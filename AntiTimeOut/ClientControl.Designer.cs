@@ -41,6 +41,7 @@
             this.lastRecordTextBox = new System.Windows.Forms.TextBox();
             this.serviceStatusTextBox = new System.Windows.Forms.TextBox();
             this.troubleshootTab = new System.Windows.Forms.TabPage();
+            this.syncServerConfigCheckBox = new System.Windows.Forms.CheckBox();
             this.saiTextBox = new System.Windows.Forms.TextBox();
             this.saiSaveButton = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
@@ -54,7 +55,6 @@
             this.osStartupCheckBox = new System.Windows.Forms.CheckBox();
             this.clientSettingsWatcher = new System.IO.FileSystemWatcher();
             this.troubleshootPanel = new System.Windows.Forms.TabPage();
-            this.syncServerConfigCheckBox = new System.Windows.Forms.CheckBox();
             this.tabControl1.SuspendLayout();
             this.intervalPanel.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -67,6 +67,7 @@
             // 
             this.dateTimeTextBox.BackColor = System.Drawing.Color.WhiteSmoke;
             this.dateTimeTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.dateTimeTextBox.Cursor = System.Windows.Forms.Cursors.Arrow;
             this.dateTimeTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Bold);
             this.dateTimeTextBox.Location = new System.Drawing.Point(0, 18);
             this.dateTimeTextBox.Name = "dateTimeTextBox";
@@ -182,8 +183,9 @@
             // 
             this.lastRecordTextBox.BackColor = System.Drawing.Color.WhiteSmoke;
             this.lastRecordTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.lastRecordTextBox.Cursor = System.Windows.Forms.Cursors.Arrow;
             this.lastRecordTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
-            this.lastRecordTextBox.Location = new System.Drawing.Point(6, 99);
+            this.lastRecordTextBox.Location = new System.Drawing.Point(6, 101);
             this.lastRecordTextBox.Name = "lastRecordTextBox";
             this.lastRecordTextBox.ReadOnly = true;
             this.lastRecordTextBox.Size = new System.Drawing.Size(333, 16);
@@ -195,8 +197,9 @@
             // 
             this.serviceStatusTextBox.BackColor = System.Drawing.Color.WhiteSmoke;
             this.serviceStatusTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.serviceStatusTextBox.Cursor = System.Windows.Forms.Cursors.Arrow;
             this.serviceStatusTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.serviceStatusTextBox.Location = new System.Drawing.Point(6, 23);
+            this.serviceStatusTextBox.Location = new System.Drawing.Point(6, 27);
             this.serviceStatusTextBox.Name = "serviceStatusTextBox";
             this.serviceStatusTextBox.ReadOnly = true;
             this.serviceStatusTextBox.Size = new System.Drawing.Size(333, 68);
@@ -217,10 +220,20 @@
             this.troubleshootTab.TabIndex = 1;
             this.troubleshootTab.Text = "Troubleshooting";
             // 
+            // syncServerConfigCheckBox
+            // 
+            this.syncServerConfigCheckBox.AutoSize = true;
+            this.syncServerConfigCheckBox.Location = new System.Drawing.Point(95, 129);
+            this.syncServerConfigCheckBox.Name = "syncServerConfigCheckBox";
+            this.syncServerConfigCheckBox.Size = new System.Drawing.Size(175, 21);
+            this.syncServerConfigCheckBox.TabIndex = 24;
+            this.syncServerConfigCheckBox.Text = "Sync with server config";
+            this.syncServerConfigCheckBox.UseVisualStyleBackColor = true;
+            // 
             // saiTextBox
             // 
             this.saiTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F);
-            this.saiTextBox.Location = new System.Drawing.Point(31, 107);
+            this.saiTextBox.Location = new System.Drawing.Point(31, 95);
             this.saiTextBox.Name = "saiTextBox";
             this.saiTextBox.Size = new System.Drawing.Size(301, 24);
             this.saiTextBox.TabIndex = 23;
@@ -229,7 +242,7 @@
             // 
             // saiSaveButton
             // 
-            this.saiSaveButton.Location = new System.Drawing.Point(116, 170);
+            this.saiSaveButton.Location = new System.Drawing.Point(116, 158);
             this.saiSaveButton.Name = "saiSaveButton";
             this.saiSaveButton.Size = new System.Drawing.Size(131, 29);
             this.saiSaveButton.TabIndex = 21;
@@ -241,7 +254,7 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(51, 71);
+            this.label1.Location = new System.Drawing.Point(51, 59);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(260, 25);
             this.label1.TabIndex = 20;
@@ -313,6 +326,7 @@
             // 
             this.versionTextBox.BackColor = System.Drawing.Color.WhiteSmoke;
             this.versionTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.versionTextBox.Cursor = System.Windows.Forms.Cursors.Arrow;
             this.versionTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.5F);
             this.versionTextBox.Location = new System.Drawing.Point(3, 200);
             this.versionTextBox.Name = "versionTextBox";
@@ -348,6 +362,8 @@
             // clientSettingsWatcher
             // 
             this.clientSettingsWatcher.EnableRaisingEvents = true;
+            this.clientSettingsWatcher.Filter = "ServiceStatus.log";
+            this.clientSettingsWatcher.NotifyFilter = System.IO.NotifyFilters.LastWrite;
             this.clientSettingsWatcher.SynchronizingObject = this;
             this.clientSettingsWatcher.Changed += new System.IO.FileSystemEventHandler(this.clientSettingsWatcher_Changed);
             // 
@@ -359,16 +375,6 @@
             this.troubleshootPanel.TabIndex = 1;
             this.troubleshootPanel.Text = "Troubleshooting";
             this.troubleshootPanel.UseVisualStyleBackColor = true;
-            // 
-            // syncServerConfigCheckBox
-            // 
-            this.syncServerConfigCheckBox.AutoSize = true;
-            this.syncServerConfigCheckBox.Location = new System.Drawing.Point(95, 141);
-            this.syncServerConfigCheckBox.Name = "syncServerConfigCheckBox";
-            this.syncServerConfigCheckBox.Size = new System.Drawing.Size(175, 21);
-            this.syncServerConfigCheckBox.TabIndex = 24;
-            this.syncServerConfigCheckBox.Text = "Sync with server config";
-            this.syncServerConfigCheckBox.UseVisualStyleBackColor = true;
             // 
             // ClientControl
             // 

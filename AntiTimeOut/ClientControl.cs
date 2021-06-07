@@ -9,10 +9,12 @@ namespace AntiTimeOut
 {
     public partial class ClientControl : UserControl
     {
+        // TODO: Add the controls to a layout panel
         private readonly Point ootRunOnceCheckBoxDefaultLocation = new Point(86, 211);
         private readonly Point ootRunOnceCheckBoxNewLocation = new Point(36, 211);
         private readonly Point ootSaveButtonDefaultLocation = new Point(181, 207);
         private readonly Point ootSaveButtonNewLocation = new Point(131, 207);
+
         private MainForm mainForm;
         private OOTBeepConfigForm ootbcf;
         private OOTRenewConfigForm ootrcf;
@@ -24,8 +26,19 @@ namespace AntiTimeOut
         {
             InitializeComponent();
             mainForm = main;
-            clientSettingsWatcher.Path = MainForm.DataFilePath;          
-            
+
+            try
+            {
+                string logDir = !string.IsNullOrWhiteSpace(Properties.Settings.Default.loadedServiceDirectory)
+                ? Path.GetDirectoryName(Properties.Settings.Default.loadedServiceDirectory)
+                : Application.StartupPath + "\\Service";
+                clientSettingsWatcher.Path = logDir;
+            }
+            catch
+            {
+                clientSettingsWatcher.Path = null;
+            }
+
             osStartupCheckBox.Checked = GetStartup();
             nvsModeCheckBox.Checked = Properties.Settings.Default.isNVSMode;
             systrayCheckBox.Checked = Properties.Settings.Default.isSystrayMode;
@@ -74,7 +87,7 @@ namespace AntiTimeOut
             string fileStr = "";
             try 
             {
-                using (FileStream fs = File.Open(MainForm.DataFilePath + "\\ServiceStatus.cfg", FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                using (FileStream fs = File.Open(clientSettingsWatcher.Path + "\\ServiceStatus.log", FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
                     try
                     {

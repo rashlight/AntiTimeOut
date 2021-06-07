@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Management;
 using System.Security.Principal;
 using System.ServiceProcess;
 using System.Windows.Forms;
@@ -26,6 +28,58 @@ namespace AntiTimeOut
             }
         }
 
+        private void PerformLoadServerFromFile()
+        {
+            try
+            {
+                ManagementObjectSearcher searcher =
+                    new ManagementObjectSearcher("root\\CIMV2",
+                    "SELECT Name, PathName FROM Win32_Service");
+
+                foreach (ManagementObject queryObj in searcher.Get())
+                {
+                    if ((string)queryObj["Name"] == "AntiTimeOut Network Service")
+                    {
+                        // For example, "drive\path_to_file\file.exe" "param1" "param2" will have
+                        // index 0: empty string, index 1: drive\path_to_file\file.exe, etc...
+                        // In this case we query the path, so select index 1
+                        Properties.Settings.Default.loadedServiceDirectory = queryObj["PathName"].ToString().Split('"')[1];
+                        Properties.Settings.Default.Save();
+                    }
+                }
+            }
+            catch (ManagementException exp)
+            {
+                string serviceWarning =
+                       "We have detected you are running Anti Time-Out Client for the first time with " +
+                       "an instance of Anti Time-Out Service (ATOService) already running in a Custom Directory.\n" +
+                       "However, the query for WMI data failed: " + exp.Message + ", " +
+                       "which will limit the detection of this service.\n" +
+                       "PRESS YES TO SPECIFY THE LOCATION OF ATOClient, NO TO CONTINUE ANYWAY, CANCEL TO EXIT.";
+                DialogResult dg = MessageBox.Show(serviceWarning, "Warning", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
+                switch (dg)
+                {
+                    case DialogResult.Yes:
+                        if (openFileDialog.ShowDialog() == DialogResult.OK)
+                        {
+                            Properties.Settings.Default.loadedServiceDirectory = openFileDialog.FileName;
+                            Properties.Settings.Default.Save();
+                            MessageBox.Show("ATOService loaded. The program will now start.", "Anti Time-Out Client", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                        else
+                        {
+                            MessageBox.Show("Failed to load service. The program will now exit.", "Anti Time-Out Client", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            Application.Exit();
+                        }
+                        break;
+                    case DialogResult.No:
+                        break;
+                    default:
+                        Application.Exit();
+                        break;
+                }
+            }
+        }
         private void UpdateClientStatus()
         {
             if (ServiceExists("AntiTimeOut Network Service"))
@@ -94,7 +148,6 @@ namespace AntiTimeOut
         {
             return ServiceController.GetServices().Any(serviceController => serviceController.ServiceName.Equals(ServiceName));
         }
-
         public ServiceControllerStatus GetServiceStatus(string ServiceName)
         {
             ServiceController sc = new ServiceController();
@@ -102,13 +155,19 @@ namespace AntiTimeOut
 
             return sc.Status;
         }
+
         private void MainControl_Load(object sender, EventArgs e)
         {
             UpdateClientStatus();
-            toolTip.SetToolTip(serviceButton, "Changes service options");
+            toolTip.SetToolTip(serviceButton, "Changes ATOService options");
             toolTip.SetToolTip(clientButton, "Modify client options");
             toolTip.SetToolTip(helpButton, "View documentation and indexes");
-            toolTip.SetToolTip(creditsButton, "Who created this program?");
+            toolTip.SetToolTip(creditsButton, "Who created this program?");      
+
+            if (ServiceExists("AntiTimeOut Network Service") && string.IsNullOrWhiteSpace(Properties.Settings.Default.loadedServiceDirectory)) 
+            {
+                PerformLoadServerFromFile();
+            }
         }
         private void statusTimer_Tick(object sender, EventArgs e)
         {

@@ -38,6 +38,7 @@
             this.serviceButton = new System.Windows.Forms.Button();
             this.statusTimer = new System.Windows.Forms.Timer(this.components);
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -45,12 +46,12 @@
             // 
             this.serviceStatusTextBox.BackColor = System.Drawing.Color.WhiteSmoke;
             this.serviceStatusTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.serviceStatusTextBox.Font = new System.Drawing.Font("Red Hat Display", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.serviceStatusTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.serviceStatusTextBox.ForeColor = System.Drawing.Color.DarkSlateGray;
             this.serviceStatusTextBox.Location = new System.Drawing.Point(0, 58);
             this.serviceStatusTextBox.Name = "serviceStatusTextBox";
             this.serviceStatusTextBox.ReadOnly = true;
-            this.serviceStatusTextBox.Size = new System.Drawing.Size(371, 18);
+            this.serviceStatusTextBox.Size = new System.Drawing.Size(371, 15);
             this.serviceStatusTextBox.TabIndex = 5;
             this.serviceStatusTextBox.TabStop = false;
             this.serviceStatusTextBox.Text = "SERVICE STATUS: UNKNOWN";
@@ -139,6 +140,12 @@
             // 
             this.toolTip.AutomaticDelay = 1500;
             // 
+            // openFileDialog
+            // 
+            this.openFileDialog.FileName = "AntiTimeOutService.exe";
+            this.openFileDialog.Filter = "ATOService|AntiTimeOutService.exe";
+            this.openFileDialog.SupportMultiDottedExtensions = true;
+            // 
             // MainControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(120F, 120F);
@@ -167,5 +174,6 @@
         private System.Windows.Forms.Button serviceButton;
         private System.Windows.Forms.Timer statusTimer;
         private System.Windows.Forms.ToolTip toolTip;
+        private System.Windows.Forms.OpenFileDialog openFileDialog;
     }
 }

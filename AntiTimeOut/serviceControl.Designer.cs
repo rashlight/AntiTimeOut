@@ -508,7 +508,7 @@
             // 
             // openFileDialog
             // 
-            this.openFileDialog.FileName = "AntiTimeOut.exe";
+            this.openFileDialog.FileName = "AntiTimeOutService.exe";
             this.openFileDialog.Filter = "ATOService|AntiTimeOutService.exe";
             this.openFileDialog.SupportMultiDottedExtensions = true;
             // 
