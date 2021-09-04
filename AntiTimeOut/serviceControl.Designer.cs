@@ -151,7 +151,7 @@
             this.serviceAvailTextBox.Size = new System.Drawing.Size(351, 23);
             this.serviceAvailTextBox.TabIndex = 9;
             this.serviceAvailTextBox.TabStop = false;
-            this.serviceAvailTextBox.Text = "ATOService is NIL";
+            this.serviceAvailTextBox.Text = "Service is NIL";
             this.serviceAvailTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // installButton

@@ -154,12 +154,12 @@ namespace AntiTimeOut
             if (!ServiceExists("AntiTimeOut Network Service"))
             {
                 serviceAvailTextBox.ForeColor = Color.DarkRed;
-                serviceAvailTextBox.Text = "ATOService is NOT INSTALLED.";
+                serviceAvailTextBox.Text = "Service is NOT INSTALLED.";
             }
             else
             {
                 serviceAvailTextBox.ForeColor = Color.ForestGreen;
-                serviceAvailTextBox.Text = "ATOService is INSTALLED.";
+                serviceAvailTextBox.Text = "Service is INSTALLED.";
             }
         }
         private void UpdateServiceParameters()
@@ -351,15 +351,6 @@ namespace AntiTimeOut
 
             installButton.Text = "Please wait...";
 
-            if (MessageBox.Show("Install AntiTimeoutService?", "AntiTimeOut", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
-            {
-                installButton.Text = "Install";
-                installButton.Enabled = true;
-                uninstallButton.Enabled = true;
-                backButton.Enabled = true;
-                return;
-            }
-
             if (!File.Exists(Application.StartupPath + "\\Service\\AntiTimeOutService.exe"))
             {
                 DialogResult dg = MessageBox.Show("Can't execute " + Application.StartupPath + "\\Service\\AntiTimeOutService.exe." +
@@ -409,7 +400,7 @@ namespace AntiTimeOut
             }
             else
             {
-                MessageBox.Show("Service installation failed, error code " + result + "\nCheck the log for more information.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Service installation failed, error code " + result + "\nCheck the event logs for more information.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
             UpdateServiceAvailability();
@@ -429,15 +420,6 @@ namespace AntiTimeOut
             uninstallButton.Text = "Please wait...";
 
             string dir = string.Empty;
-
-            if (MessageBox.Show("Uninstall AntiTimeoutService?\nSome functions in this client will be limited.", "AntiTimeOut", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No) 
-            {
-                uninstallButton.Text = "Uninstall";
-                installButton.Enabled = true;
-                uninstallButton.Enabled = true;
-                backButton.Enabled = true;
-                return;
-            } 
 
             if (!File.Exists(Properties.Settings.Default.loadedServiceDirectory))
             {

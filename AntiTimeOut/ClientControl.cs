@@ -199,7 +199,7 @@ namespace AntiTimeOut
                     }
                     else
                     {
-                        MessageBox.Show("Parameter(s) not set! Go to \"Settings...\" button to set options.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show("Parameters not set! Go to \"Settings...\" button to set options.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         return;
                     }
                     break;
@@ -259,14 +259,15 @@ namespace AntiTimeOut
         }
         private void saiSaveButton_Click(object sender, EventArgs e)
         {
-            if (!IsDigitsOnly(saiTextBox.Text) || string.IsNullOrWhiteSpace(saiTextBox.Text) || Convert.ToInt32(saiTextBox.Text) <= 0)
+            if (!IsDigitsOnly(saiTextBox.Text) || string.IsNullOrWhiteSpace(saiTextBox.Text))
             {
                 MessageBox.Show("Interval is in incorrect format!", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
             if (Convert.ToInt32(saiTextBox.Text) <= 0)
             {
-                MessageBox.Show("\"Service Availibility Interval\" value is not in range (1 -> " + int.MaxValue + ")", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("\"Service Availibility Interval\" value is not in range! (1 -> " + int.MaxValue + ")", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
             }
             Properties.Settings.Default.servicePollingTime = Convert.ToInt32(saiTextBox.Text);
             Properties.Settings.Default.Save();
@@ -274,7 +275,7 @@ namespace AntiTimeOut
         }
         private void authorLink_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            System.Diagnostics.Process.Start("http://github.com/rashlight/");
+            System.Diagnostics.Process.Start("https://github.com/rashlight/");
         }
         private void osStartupCheckBox_CheckedChanged(object sender, EventArgs e)
         {
