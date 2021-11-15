@@ -45,7 +45,7 @@
             this.label2.ForeColor = System.Drawing.SystemColors.ControlText;
             this.label2.Location = new System.Drawing.Point(89, 10);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(355, 64);
+            this.label2.Size = new System.Drawing.Size(349, 62);
             this.label2.TabIndex = 1;
             this.label2.Text = "Anti Time-Out";
             this.label2.UseMnemonic = false;
@@ -57,7 +57,7 @@
             this.label1.ForeColor = System.Drawing.SystemColors.ControlText;
             this.label1.Location = new System.Drawing.Point(144, 74);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(241, 31);
+            this.label1.Size = new System.Drawing.Size(230, 30);
             this.label1.TabIndex = 2;
             this.label1.Text = "Client (GUI) Version";
             this.label1.UseMnemonic = false;
@@ -105,8 +105,8 @@
             // 
             // CreditsForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(120F, 120F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(531, 462);
             this.Controls.Add(this.closeButton);
             this.Controls.Add(this.groupBox1);
@@ -114,6 +114,7 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.label2);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "CreditsForm";

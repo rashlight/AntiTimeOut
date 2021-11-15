@@ -107,7 +107,7 @@
             // 
             // cancelButton
             // 
-            this.cancelButton.Font = new System.Drawing.Font("Roboto Mono", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cancelButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.cancelButton.Location = new System.Drawing.Point(282, 147);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(268, 31);
@@ -118,7 +118,7 @@
             // 
             // OKButton
             // 
-            this.OKButton.Font = new System.Drawing.Font("Roboto Mono", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.OKButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.OKButton.Location = new System.Drawing.Point(16, 147);
             this.OKButton.Name = "OKButton";
             this.OKButton.Size = new System.Drawing.Size(260, 31);
@@ -129,8 +129,8 @@
             // 
             // OOTRenewConfigForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(120F, 120F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(562, 190);
             this.ControlBox = false;
             this.Controls.Add(this.cancelButton);
