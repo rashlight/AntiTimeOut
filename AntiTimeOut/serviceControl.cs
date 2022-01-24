@@ -15,12 +15,13 @@ namespace AntiTimeOut
     {
         THROW_EXCEPTION = -1,
         DO_NOTHING = 0,
-        WRITE_WARNING_LOG = 1,
+        WRITE_WARNING_LOG_ENDLESS = 1,
+        WRITE_WARNING_LOG_ONCE = 2,
     }
     public enum CommandAction
     {
         CONNECTION_TEST = 128,
-        ERASE_MEM_EVENTLOGS = 129,
+        ERASE_EVENTLOGS = 129,
         CHANGE_LOGLVL_NONE = 130,
         CHANGE_LOGLVL_CONSERVATIVE = 131,
         CHANGE_LOGLVL_NORMAL = 132,
@@ -351,29 +352,23 @@ namespace AntiTimeOut
 
             installButton.Text = "Please wait...";
 
-            if (!File.Exists(Application.StartupPath + "\\Service\\AntiTimeOutService.exe"))
+            if (File.Exists(MainForm.DataFilePath + "\\AntiTimeOutService.exe"))
             {
-                DialogResult dg = MessageBox.Show("Can't execute " + Application.StartupPath + "\\Service\\AntiTimeOutService.exe." +
-                    "\nDo you want to specify location of AntiTimeOutService.exe?", "AntiTimeOut", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-                if (dg != DialogResult.Yes || openFileDialog.ShowDialog() != DialogResult.OK)
-                {
-                    installButton.Text = "Install";
-                    installButton.Enabled = true;
-                    uninstallButton.Enabled = true;
-                    backButton.Enabled = true;
-                    return;
-                }
-
-                MessageBox.Show(openFileDialog.FileName);
+                openFileDialog.InitialDirectory = MainForm.DataFilePath;
             }
-            else 
+            DialogResult dg = openFileDialog.ShowDialog();
+            if (dg != DialogResult.OK)
             {
-                openFileDialog.FileName = Application.StartupPath + "\\Service\\AntiTimeOutService.exe";
-            } 
+                installButton.Text = "Install";
+                installButton.Enabled = true;
+                uninstallButton.Enabled = true;
+                backButton.Enabled = true;
+                return;
+            }
 
             if (Process.GetProcessesByName("mmc").Length > 0)
             {
-                DialogResult dg = MessageBox.Show("In order to complete this installation, Microsoft Management Console must be terminated." +
+                dg = MessageBox.Show("In order to complete this installation, Microsoft Management Console must be terminated." +
                 "\nClick \"OK\" to terminate ALL mmc.exe processes and continue, or \"Cancel\" to exit.", "AntiTimeOut", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
 
                 if (dg != DialogResult.OK)
@@ -394,9 +389,10 @@ namespace AntiTimeOut
             int result = await RunProcessAsync(openFileDialog.FileName, "-i");
             if (result == 0 && ServiceExists("AntiTimeOut Network Service"))
             {
-                Properties.Settings.Default.loadedServiceDirectory = openFileDialog.FileName;
-                Properties.Settings.Default.Save();
                 MessageBox.Show("Service installed successfully.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                // Register new directory forcefully
+                Properties.Settings.Default.loadedServiceDirectory = Path.GetDirectoryName(openFileDialog.FileName);
+                Properties.Settings.Default.Save();
             }
             else
             {
@@ -421,9 +417,9 @@ namespace AntiTimeOut
 
             string dir = string.Empty;
 
-            if (!File.Exists(Properties.Settings.Default.loadedServiceDirectory))
+            if (!File.Exists(MainForm.DataFilePath + "\\AntiTimeOutService.exe"))
             {
-                DialogResult dg = MessageBox.Show("Can't execute " + Application.StartupPath + "\\Service\\AntiTimeOutService.exe." +
+                DialogResult dg = MessageBox.Show("Can't execute " + MainForm.DataFilePath + "\\AntiTimeOutService.exe" +
                     "\nDo you want to specify location of AntiTimeOutService.exe?", "AntiTimeOut", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                 if (dg != DialogResult.Yes || openFileDialog.ShowDialog() != DialogResult.OK)
                 {                    
@@ -433,14 +429,16 @@ namespace AntiTimeOut
                     backButton.Enabled = true;
                     return;
                 }
-                else
-                {
-                    dir = openFileDialog.FileName;
-                }
+
+                dir = openFileDialog.FileName;
+
+                // Register new directory forcefully
+                Properties.Settings.Default.loadedServiceDirectory = Path.GetDirectoryName(openFileDialog.FileName);
+                Properties.Settings.Default.Save();
             }
             else
             {
-                dir = Properties.Settings.Default.loadedServiceDirectory;
+                dir = MainForm.DataFilePath + "\\AntiTimeOutService.exe";
             }
 
             if (Process.GetProcessesByName("mmc").Length > 0)

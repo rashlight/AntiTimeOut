@@ -29,9 +29,7 @@ namespace AntiTimeOut
 
             try
             {
-                string logDir = !string.IsNullOrWhiteSpace(Properties.Settings.Default.loadedServiceDirectory)
-                ? Path.GetDirectoryName(Properties.Settings.Default.loadedServiceDirectory)
-                : Application.StartupPath + "\\Service";
+                string logDir = MainForm.DataFilePath;
                 clientSettingsWatcher.Path = logDir;
             }
             catch
@@ -79,7 +77,7 @@ namespace AntiTimeOut
             return true;
         }
         /// <summary>
-        /// Updates the ServiceStatus.cfg infomation to Live Update.
+        /// Updates the ServiceStatus.log infomation to Live Update.
         /// For more information, check the ATOHelp.chm file.
         /// </summary>
         private void UpdateStatus()

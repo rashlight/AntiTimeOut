@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Management;
 using System.Text;
 using System.Windows.Forms;
 
@@ -16,6 +17,9 @@ namespace AntiTimeOut
     public partial class MainForm : Form
     {
         public bool ErrorRunOnce = false;
+        /// <summary>
+        /// The service directory, loaded by MainForm.GetServiceDirectory()
+        /// </summary>
         public static string DataFilePath = "";
 
         public void ChangeControl(Control currentControl, Control newControl)
@@ -39,52 +43,95 @@ namespace AntiTimeOut
             switch (Properties.Settings.Default.serviceErrorAction)
             {
                 case (int)ServiceError.THROW_EXCEPTION:
-                    {
-                        throw new Exception("An User-Handled AntiTimeOutService exception has been detected.");
-                    }
+                    throw new Exception("An User-Handled AntiTimeOutService exception has been detected.");
                 case (int)ServiceError.BEEP:
+                    using (System.Media.SoundPlayer soundPlayer = new System.Media.SoundPlayer(Properties.Settings.Default.ootBeepSFXDir))
                     {
-                        using (System.Media.SoundPlayer soundPlayer = new System.Media.SoundPlayer(Properties.Settings.Default.ootBeepSFXDir))
+                        try
                         {
-                            try
-                            {
-                                soundPlayer.Play();
-                            }
-                            catch
-                            {
-                                System.Media.SystemSounds.Beep.Play();
-                            }
+                            soundPlayer.Play();
                         }
-                        break;
+                        catch
+                        {
+                            System.Media.SystemSounds.Beep.Play();
+                        }
                     }
+                    break;
                 case (int)ServiceError.RESET_WLAN_CONNECTION:
-                    {
-                        string argsString = "wlan connect name=" + Properties.Settings.Default.ootRenewName +
+                    string argsString = "wlan connect name=" + Properties.Settings.Default.ootRenewName +
                             (!string.IsNullOrWhiteSpace(Properties.Settings.Default.ootRenewSSID) ? " ssid=" + Properties.Settings.Default.ootRenewSSID : "") +
                             (!string.IsNullOrWhiteSpace(Properties.Settings.Default.ootRenewInterface) ? " interface=" + Properties.Settings.Default.ootRenewInterface : "");
 
-                        var flush_process = new System.Diagnostics.Process
-                        {
-                            StartInfo = { FileName = "ipconfig.exe", Arguments = "/flushdns", CreateNoWindow = true, UseShellExecute = false },
-                            EnableRaisingEvents = true
-                        };
+                    var flush_process = new System.Diagnostics.Process
+                    {
+                        StartInfo = { FileName = "ipconfig.exe", Arguments = "/flushdns", CreateNoWindow = true, UseShellExecute = false },
+                        EnableRaisingEvents = true
+                    };
 
-                        var netsh_process = new System.Diagnostics.Process
-                        {
-                            StartInfo = { FileName = "netsh.exe", Arguments = argsString, CreateNoWindow = true, UseShellExecute = false},
-                            EnableRaisingEvents = true
-                        };
+                    var netsh_process = new System.Diagnostics.Process
+                    {
+                        StartInfo = { FileName = "netsh.exe", Arguments = argsString, CreateNoWindow = true, UseShellExecute = false },
+                        EnableRaisingEvents = true
+                    };
 
-                        flush_process.Start();
-                        netsh_process.Start();
+                    flush_process.Start();
+                    netsh_process.Start();
 
-                        break;
-                    }
+                    break;
                 default:
                     break;
             }
 
             if (isRunOnce) ErrorRunOnce = true;
+        }
+
+        private string GetServiceDirectory()
+        {
+            // We check the default location first
+            if (!string.IsNullOrEmpty(Properties.Settings.Default.loadedServiceDirectory))
+            {
+                DataFilePath = Properties.Settings.Default.loadedServiceDirectory;
+            }
+            else 
+            {
+                // Then we use WMI to check the service location (if exist)
+                try
+                {
+                    ManagementObjectSearcher searcher =
+                        new ManagementObjectSearcher("root\\CIMV2",
+                        "SELECT Name, PathName FROM Win32_Service");
+
+                    foreach (ManagementObject queryObj in searcher.Get())
+                    {
+                        if ((string)queryObj["Name"] == "AntiTimeOut Network Service")
+                        {
+                            // For example, "drive\path_to_file\file.exe" "param1" "param2" will have
+                            // index 0: empty string, index 1: drive\path_to_file\file.exe, index 2: param1, etc.
+                            // In this case we query the path, so select index 1
+                            DataFilePath = Path.GetDirectoryName(queryObj["PathName"].ToString().Split('"')[1]);
+                        }
+                    }
+                }
+                catch
+                {
+                    // If there are none, then give up and use drive\path_to_client\Service
+                    DataFilePath = AppDomain.CurrentDomain.BaseDirectory + "\\Service";
+                }
+            }
+
+            // Then check if service exists
+            while (!File.Exists(DataFilePath + "\\AntiTimeOutService.exe"))
+            {
+                DialogResult dg = MessageBox.Show("There are no AntiTimeOutService available at \"" + DataFilePath + "\"\n" +
+                    "This can happened due to folder migration or no services installed.\n" +
+                    "Press OK to select the folder location, or Cancel to exit.", "AntiTimeOut", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+                if (dg == DialogResult.Cancel) Application.Exit();
+
+                folderBrowserDialog.ShowDialog();
+                DataFilePath = folderBrowserDialog.SelectedPath;
+            }
+
+            return DataFilePath;
         }
 
         public MainForm()
@@ -96,24 +143,19 @@ namespace AntiTimeOut
                 this.ShowInTaskbar = false;
             }
             mainPanel.Controls.Add(new MainControl(this));
+        }
 
-            if (!string.IsNullOrEmpty(Properties.Settings.Default.loadedServiceDirectory))
-                DataFilePath = AppDomain.CurrentDomain.BaseDirectory;
-            else DataFilePath = Properties.Settings.Default.loadedServiceDirectory;
-
-            DataFilePath += "\\ServiceConfig.cfg";
-
-            if (!Directory.Exists(DataFilePath))
-            {
-                Directory.CreateDirectory(DataFilePath);
-            }
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.loadedServiceDirectory = GetServiceDirectory();
+            Properties.Settings.Default.Save();
             fileSystemWatcher.Path = DataFilePath;
         }
 
         private void fileSystemWatcher_Changed(object sender, FileSystemEventArgs e)
         {
             string fileStr = "";
-            using (FileStream fs = File.Open(DataFilePath + "\\ServiceStatus.cfg", FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (FileStream fs = File.Open(DataFilePath + "\\ServiceStatus.log", FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
                 try
                 {
@@ -127,7 +169,7 @@ namespace AntiTimeOut
 
                     if (string.IsNullOrWhiteSpace(fileStr)) return;
 
-                    // Check if service status is ERROR"
+                    // Check if service status is ERROR
                     string[] data = fileStr.Split(' ');
                     if (Convert.ToBoolean(data[1]))
                     {
@@ -137,7 +179,7 @@ namespace AntiTimeOut
                 }
                 catch
                 {
-                    throw;
+
                 }
             }
         }

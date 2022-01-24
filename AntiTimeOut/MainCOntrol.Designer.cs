@@ -68,7 +68,7 @@
             this.dateTimeTextBox.Size = new System.Drawing.Size(371, 40);
             this.dateTimeTextBox.TabIndex = 4;
             this.dateTimeTextBox.TabStop = false;
-            this.dateTimeTextBox.Text = "CHOOSE A SETTING:";
+            this.dateTimeTextBox.Text = "CHOOSE AN OPTION:";
             this.dateTimeTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // panel1
