@@ -19,7 +19,6 @@ namespace AntiTimeOut
             if (Environment.OSVersion.Version.Major <= 6)
             {
                 SetProcessDPIAware();
-                string releaseId = Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion", "ReleaseId", "").ToString();
             }
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);

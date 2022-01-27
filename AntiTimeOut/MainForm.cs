@@ -34,7 +34,6 @@ namespace AntiTimeOut
                 currentControl.Dispose();
             }
             mainPanel.Controls.Add(newControl);
-            currentControl = newControl;
         }
         private void ReportError(string time, bool isRunOnce)
         {
@@ -193,7 +192,7 @@ namespace AntiTimeOut
             }
         }
 
-        private void notifyIcon_MouseDoubleClick(object sender, MouseEventArgs e)
+        private void notifyIcon_MouseClick(object sender, MouseEventArgs e)
         {
             this.ShowInTaskbar = true;
             Show();
@@ -217,11 +216,6 @@ namespace AntiTimeOut
         {
             CreditsForm cf = new CreditsForm();
             cf.Show();
-        }
-
-        private void notifyIcon_MouseClick(object sender, MouseEventArgs e)
-        {
-            
         }
     }
 }

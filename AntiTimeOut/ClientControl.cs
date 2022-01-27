@@ -167,7 +167,7 @@ namespace AntiTimeOut
             bool convResult = Enum.TryParse(ootComboBox.GetItemText(ootComboBox.SelectedItem), out ServiceError result);
             if (!convResult)
             {
-                MessageBox.Show("Can't parse regulated Out-Of-Time action.\nCheck your selection and try again.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Can't parse this Out-Of-Time action.\nCheck your selection and try again.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
             Properties.Settings.Default.serviceErrorAction = (int)result;
@@ -180,20 +180,8 @@ namespace AntiTimeOut
                 case ServiceError.BEEP:
                     if (ootbcf != null && ootbcf.DialogResult == DialogResult.OK)
                     {
-                        try
-                        {
-                            Properties.Settings.Default.ootBeepSFXDir = ootbcf.sfxName;
-                        }
-                        catch (Exception exp)
-                        {
-                            Properties.Settings.Default.ootBeepSFXDir = string.Empty;
-                            MessageBox.Show("Failed to set parameter(s): " + exp.Message, "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            return;
-                        }
-                        finally
-                        {
-                            Properties.Settings.Default.Save();
-                        }
+                        Properties.Settings.Default.ootBeepSFXDir = ootbcf.sfxName;
+                        Properties.Settings.Default.Save();
                     }
                     else
                     {
@@ -204,24 +192,10 @@ namespace AntiTimeOut
                 case ServiceError.RESET_WLAN_CONNECTION:
                     if (ootrcf != null && ootrcf.DialogResult == DialogResult.OK)
                     {
-                        try
-                        {
-                            Properties.Settings.Default.ootRenewName = ootrcf.ProfileName;
-                            Properties.Settings.Default.ootRenewSSID = ootrcf.SSID;
-                            Properties.Settings.Default.ootRenewInterface = ootrcf.InterfaceName;
-                        }
-                        catch (Exception exp)
-                        {
-                            Properties.Settings.Default.ootRenewName = string.Empty;
-                            Properties.Settings.Default.ootRenewSSID = string.Empty;
-                            Properties.Settings.Default.ootRenewInterface = string.Empty;
-                            MessageBox.Show("Failed to set parameter(s): " + exp.Message, "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            return;
-                        }
-                        finally
-                        {
-                            Properties.Settings.Default.Save();
-                        }
+                        Properties.Settings.Default.ootRenewName = ootrcf.ProfileName;
+                        Properties.Settings.Default.ootRenewSSID = ootrcf.SSID;
+                        Properties.Settings.Default.ootRenewInterface = ootrcf.InterfaceName;
+                        Properties.Settings.Default.Save();
                     }
                     else
                     {
@@ -341,7 +315,7 @@ namespace AntiTimeOut
             {
                 case ServiceError.BEEP:
                     {
-                        ootbcf = new OOTBeepConfigForm(Environment.GetEnvironmentVariable("windir") + "\\Media");
+                        ootbcf = new OOTBeepConfigForm();
                         ootbcf.ShowDialog();                        
                         break;
                     }

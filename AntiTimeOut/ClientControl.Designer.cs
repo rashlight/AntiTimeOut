@@ -225,7 +225,7 @@
             this.syncServerConfigCheckBox.AutoSize = true;
             this.syncServerConfigCheckBox.Location = new System.Drawing.Point(95, 129);
             this.syncServerConfigCheckBox.Name = "syncServerConfigCheckBox";
-            this.syncServerConfigCheckBox.Size = new System.Drawing.Size(175, 21);
+            this.syncServerConfigCheckBox.Size = new System.Drawing.Size(164, 20);
             this.syncServerConfigCheckBox.TabIndex = 24;
             this.syncServerConfigCheckBox.Text = "Sync with server config";
             this.syncServerConfigCheckBox.UseVisualStyleBackColor = true;
@@ -282,7 +282,7 @@
             this.sbsModeCheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
             this.sbsModeCheckBox.Location = new System.Drawing.Point(101, 89);
             this.sbsModeCheckBox.Name = "sbsModeCheckBox";
-            this.sbsModeCheckBox.Size = new System.Drawing.Size(155, 21);
+            this.sbsModeCheckBox.Size = new System.Drawing.Size(149, 20);
             this.sbsModeCheckBox.TabIndex = 6;
             this.sbsModeCheckBox.Text = "Side-by-side Clients";
             this.sbsModeCheckBox.UseVisualStyleBackColor = true;
@@ -294,7 +294,7 @@
             this.nvsModeCheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
             this.nvsModeCheckBox.Location = new System.Drawing.Point(86, 61);
             this.nvsModeCheckBox.Name = "nvsModeCheckBox";
-            this.nvsModeCheckBox.Size = new System.Drawing.Size(191, 21);
+            this.nvsModeCheckBox.Size = new System.Drawing.Size(182, 20);
             this.nvsModeCheckBox.TabIndex = 5;
             this.nvsModeCheckBox.Text = "Non-Visible Startup Mode";
             this.nvsModeCheckBox.UseVisualStyleBackColor = true;
@@ -316,7 +316,7 @@
             this.systrayCheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
             this.systrayCheckBox.Location = new System.Drawing.Point(121, 117);
             this.systrayCheckBox.Name = "systrayCheckBox";
-            this.systrayCheckBox.Size = new System.Drawing.Size(116, 21);
+            this.systrayCheckBox.Size = new System.Drawing.Size(112, 20);
             this.systrayCheckBox.TabIndex = 2;
             this.systrayCheckBox.Text = "Systray Mode";
             this.systrayCheckBox.UseVisualStyleBackColor = true;
@@ -343,7 +343,7 @@
             this.authorLink.Size = new System.Drawing.Size(351, 17);
             this.authorLink.TabIndex = 0;
             this.authorLink.TabStop = true;
-            this.authorLink.Text = "@rashlight 2020-2021";
+            this.authorLink.Text = "@rashlight 2020-2022";
             this.authorLink.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.authorLink.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.authorLink_LinkClicked);
             // 
@@ -353,7 +353,7 @@
             this.osStartupCheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
             this.osStartupCheckBox.Location = new System.Drawing.Point(64, 33);
             this.osStartupCheckBox.Name = "osStartupCheckBox";
-            this.osStartupCheckBox.Size = new System.Drawing.Size(237, 21);
+            this.osStartupCheckBox.Size = new System.Drawing.Size(219, 20);
             this.osStartupCheckBox.TabIndex = 0;
             this.osStartupCheckBox.Text = "Run the program when OS starts";
             this.osStartupCheckBox.UseVisualStyleBackColor = true;
