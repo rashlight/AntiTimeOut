@@ -705,7 +705,7 @@ namespace AntiTimeOut
 
             if (failModeComboBox.SelectedIndex < 0)
             {
-                MessageBox.Show("Choose a failture mode (5) to continue...", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Choose a failure mode (5) to continue...", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
