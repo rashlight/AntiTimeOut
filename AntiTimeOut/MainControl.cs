@@ -17,15 +17,6 @@ namespace AntiTimeOut
         {
             InitializeComponent();
             mainForm = main;
-
-            try
-            {
-                statusTimer.Interval = Properties.Settings.Default.servicePollingTime;
-            }
-            catch
-            {
-                Properties.Settings.Default.servicePollingTime = 1000;
-            }
         }
 
         private void UpdateClientStatus()
@@ -106,6 +97,20 @@ namespace AntiTimeOut
 
         private void MainControl_Load(object sender, EventArgs e)
         {
+            try
+            {
+                if (Properties.Settings.Default.isServerUpdateSync)
+                {
+                    // Get the service interval
+                    statusTimer.Interval = Convert.ToInt32(File.ReadAllText(MainForm.DataFilePath + "\\ServiceConfig.cfg").Split(' ')[0]);
+                }
+                else statusTimer.Interval = Properties.Settings.Default.servicePollingTime;
+            }
+            catch
+            {
+                Properties.Settings.Default.servicePollingTime = 1000;
+            }
+
             UpdateClientStatus();
             toolTip.SetToolTip(serviceButton, "Changes ATOService options");
             toolTip.SetToolTip(clientButton, "Modify client options");

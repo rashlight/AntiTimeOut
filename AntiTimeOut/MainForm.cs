@@ -123,7 +123,7 @@ namespace AntiTimeOut
             while (!File.Exists(DataFilePath + "\\AntiTimeOutService.exe"))
             {
                 DialogResult dg = MessageBox.Show("There are no AntiTimeOutService available at \"" + DataFilePath + "\"\n" +
-                    "This can happened due to folder migration or no services installed.\n" +
+                    "This can happened due to folder migration, wrong file name or no services installed.\n" +
                     "Press OK to select the folder location, or Cancel to exit.", "AntiTimeOut", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
                 if (dg == DialogResult.Cancel) Application.Exit();
 
@@ -142,7 +142,6 @@ namespace AntiTimeOut
                 this.WindowState = FormWindowState.Minimized;
                 this.ShowInTaskbar = false;
             }
-            mainPanel.Controls.Add(new MainControl(this));
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -150,6 +149,7 @@ namespace AntiTimeOut
             Properties.Settings.Default.loadedServiceDirectory = GetServiceDirectory();
             Properties.Settings.Default.Save();
             fileSystemWatcher.Path = DataFilePath;
+            mainPanel.Controls.Add(new MainControl(this));
         }
 
         private void fileSystemWatcher_Changed(object sender, FileSystemEventArgs e)

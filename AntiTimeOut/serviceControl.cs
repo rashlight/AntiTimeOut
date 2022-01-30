@@ -70,20 +70,6 @@ namespace AntiTimeOut
         {
             InitializeComponent();
             mainForm = main;
-
-            try 
-            {
-                statusTimer.Interval = Properties.Settings.Default.servicePollingTime;
-            }
-            catch
-            {
-                Properties.Settings.Default.servicePollingTime = 1000;
-            }          
-            
-            if (!WindowsIdentity.GetCurrent().Owner.IsWellKnown(WellKnownSidType.BuiltinAdministratorsSid))
-            {
-                adminBlockPanel.Visible = true;
-            }
         }
 
         private bool IsDigitsOnly(string str)
@@ -181,7 +167,26 @@ namespace AntiTimeOut
         }
         private void UpdateServiceParameters()
         {
-            failModeComboBox.SelectedIndex = 0;
+            try
+            {
+                string[] parameters = File.ReadAllText(MainForm.DataFilePath + "\\ServiceConfig.cfg").Split(' ');
+                intervalTextBox.Text = parameters[0];
+                timeOutTextBox.Text = parameters[1];
+                urlTextBox.Text = parameters[2];
+                failtureLimitTextBox.Text = parameters[3];
+                failModeComboBox.SelectedIndex = 0;
+                for (int i = 0; i < failModeComboBox.Items.Count; i++)
+                {
+                    if (parameters[4].ToString() == failModeComboBox.Items[i].ToString())
+                    {
+                        failModeComboBox.SelectedIndex = i;
+                        break;
+                    }
+                }
+            }
+            catch
+            {
+            }
         }
 
         public bool ServiceExists(string ServiceName)
@@ -333,6 +338,20 @@ namespace AntiTimeOut
 
         private void ServiceControl_Load(object sender, EventArgs e)
         {
+            try
+            {
+                if (Properties.Settings.Default.isServerUpdateSync)
+                {
+                    // Get the service interval
+                    statusTimer.Interval = Convert.ToInt32(File.ReadAllText(MainForm.DataFilePath + "\\ServiceConfig.cfg").Split(' ')[0]);
+                }
+                else statusTimer.Interval = Properties.Settings.Default.servicePollingTime;
+            }
+            catch
+            {
+                Properties.Settings.Default.servicePollingTime = 1000;
+            }
+
             foreach (string action in Enum.GetNames(typeof(CommandAction)))
             {
                 commandComboBox.Items.Add(action);
@@ -340,6 +359,11 @@ namespace AntiTimeOut
             foreach (string action in Enum.GetNames(typeof(LimitAction)))
             {
                 failModeComboBox.Items.Add(action);
+            }
+
+            if (!WindowsIdentity.GetCurrent().Owner.IsWellKnown(WellKnownSidType.BuiltinAdministratorsSid))
+            {
+                adminBlockPanel.Visible = true;
             }
 
             UpdateClientStatus();
@@ -726,7 +750,7 @@ namespace AntiTimeOut
             }
             catch (Exception exp)
             {
-                MessageBox.Show(exp.Source + ": " + exp.Message, "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("This operation has caused an exeption:\n" + exp.Source + ": " + exp.Message, "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
         }
@@ -745,7 +769,7 @@ namespace AntiTimeOut
 
             if (failModeComboBox.SelectedIndex < 0)
             {
-                MessageBox.Show("Choose a failture mode (5) to continue...", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Choose a failure mode (5) to continue...", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -764,12 +788,17 @@ namespace AntiTimeOut
 
                 var configFolderName = MainForm.DataFilePath;
                 Directory.CreateDirectory(configFolderName);
-                File.WriteAllText(configFolderName + "\\ServiceConfig.cfg", interval + " " + timeOut + " " + link + " " + failLimit + " " + (int)failMode);
-                MessageBox.Show("Parameters changed successfully.\n(Restart service to take effect)", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                File.WriteAllText(configFolderName + "\\ServiceConfig.cfg", interval + " " + timeOut + " " + link + " " + failLimit + " " + failMode.ToString());
+                if (Properties.Settings.Default.isServerUpdateSync)
+                {
+                    DialogResult dg = MessageBox.Show("Parameters changed successfully. (Restart service to take effect)\nDo you want to apply for client as well? (restart required)", "AntiTimeOut", MessageBoxButtons.OKCancel, MessageBoxIcon.Information);
+                    if (dg == DialogResult.OK) Application.Restart();
+                }
+                else MessageBox.Show("Parameters changed successfully. (Restart service to take effect)", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception exp)
             {
-                MessageBox.Show("An operation has caused an exeption:" + exp.Source + ": " + exp.Message, "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("This operation has caused an exeption:\n" + exp.Source + ": " + exp.Message, "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
         }

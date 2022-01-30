@@ -1,5 +1,6 @@
 ﻿using Microsoft.Win32;
 using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Text;
@@ -37,15 +38,10 @@ namespace AntiTimeOut
                 clientSettingsWatcher.Path = null;
             }
 
-            osStartupCheckBox.Checked = GetStartup();
-            nvsModeCheckBox.Checked = Properties.Settings.Default.isNVSMode;
-            systrayCheckBox.Checked = Properties.Settings.Default.isSystrayMode;
-            systrayCheckBox.Enabled = !nvsModeCheckBox.Checked;
-
             // Add UAC shield
-            const int CMD_SETSHIELD = 0x160C;
+            const int BCM_SETSHIELD = 0x160C;
             adminRestartButton.FlatStyle = FlatStyle.System;
-            SendMessage(adminRestartButton.Handle, CMD_SETSHIELD, 0, 1);
+            SendMessage(adminRestartButton.Handle, BCM_SETSHIELD, 0, 1);
         }
 
         private void SetStartup()
@@ -156,6 +152,28 @@ namespace AntiTimeOut
             ootRunOnceCheckBox.Checked = Properties.Settings.Default.isRunOnceMode;
             systrayCheckBox.Checked = Properties.Settings.Default.isSystrayMode;
             ootComboBox.SelectedIndex = Properties.Settings.Default.ootSelectedModeIndex;
+
+            syncServerConfigCheckBox.Checked = Properties.Settings.Default.isServerUpdateSync;
+            if (Properties.Settings.Default.isServerUpdateSync)
+            {
+                saiTextBox.Enabled = false;
+                string updateTime = "1000";
+                try
+                {
+                    // Get the service interval
+                    updateTime = File.ReadAllText(MainForm.DataFilePath + "\\ServiceConfig.cfg").Split(' ')[0];
+                }
+                catch
+                {
+                }
+                saiTextBox.Text = updateTime;
+            }
+
+            osStartupCheckBox.Checked = GetStartup();
+            sbsModeCheckBox.Checked = Properties.Settings.Default.isSBSMode;
+            nvsModeCheckBox.Checked = Properties.Settings.Default.isNVSMode;
+            systrayCheckBox.Checked = Properties.Settings.Default.isSystrayMode;
+            systrayCheckBox.Enabled = !nvsModeCheckBox.Checked;
         }
         private void ootSaveButton_Click(object sender, EventArgs e)
         {
@@ -327,6 +345,122 @@ namespace AntiTimeOut
         {
             Properties.Settings.Default.isSBSMode = sbsModeCheckBox.Checked;
             Properties.Settings.Default.Save();
+        }
+        private void clearServiceLogButton_Click(object sender, EventArgs e)
+        {
+            bool isExists = File.Exists(MainForm.DataFilePath + "\\install.log");
+
+            if (!isExists)
+            {
+                MessageBox.Show(
+                    "There are no install.log at\n" + MainForm.DataFilePath + "\n" +
+                    "Check this later when service regenerate the file or delete it manually.",
+                    "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            string message = "This action will delete the installation log file at\n" + MainForm.DataFilePath + "\\install.log" +
+                "\n\nThe file is used for error purposes, but can affect service setup time. " +
+                "\n\nAre you sure to do this?";
+
+            DialogResult dg = MessageBox.Show(message, "AntiTimeOut", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+            if (dg == DialogResult.OK)
+            {
+                try
+                {
+                    File.Delete(MainForm.DataFilePath + "\\install.log");
+                }
+                catch (Exception exp)
+                {
+                    MessageBox.Show("This operation has caused an exeption:\n" + exp.Source + ": " + exp.Message, "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                MessageBox.Show("Installation log deleted successfully.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+        private void showDefServiceButton_Click(object sender, EventArgs e)
+        {
+            string assemblyPath = MainForm.DataFilePath + "\\AntiTimeOutService.exe";
+            bool isServiceExists = File.Exists(assemblyPath);
+            string version = isServiceExists ? FileVersionInfo.GetVersionInfo(assemblyPath).FileVersion : "Unknown";
+            bool isSpecial = isServiceExists ? FileVersionInfo.GetVersionInfo(assemblyPath).IsSpecialBuild : false;
+            bool isConfigExists = File.Exists(MainForm.DataFilePath + "\\ServiceConfig.cfg");
+            string cfgContent = isConfigExists ? File.ReadAllText(MainForm.DataFilePath + "\\ServiceConfig.cfg") : "Unknown";
+
+            string message = "Location: " + MainForm.DataFilePath + "\n" +
+                "Service exists: " + isServiceExists.ToString() + "\n" +
+                "Version: " + version + "\n" +
+                "Special build: " + isSpecial.ToString() + "\n" +
+                "Configuration file exists: " + isConfigExists.ToString() + "\n" +
+                "Configuration contents: " + cfgContent;
+            MessageBox.Show(message, "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        private void deleteInstallStateButton_Click(object sender, EventArgs e)
+        {
+            bool isExists = File.Exists(MainForm.DataFilePath + "\\AntiTimeOutService.InstallState");
+
+            if (!isExists)
+            {
+                MessageBox.Show(
+                    "There are no InstallState file at\n" + MainForm.DataFilePath + "\n" +
+                    "Check this later when service regenerate the file or delete it manually.",
+                    "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            string message = "This action will delete the InstallState file at\n" + MainForm.DataFilePath + "\\AntiTimeOutService.InstallState" +
+                "\n\nUsually, an InstallState file supports the uninstallation of AntiTimeOutService, however " +
+                "if there are errors (mainly in service upgrades), it is first recommended to delete this file." +
+                "\n\nAre you sure to do this?";
+
+            DialogResult dg = MessageBox.Show(message, "AntiTimeOut", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+            if (dg == DialogResult.OK)
+            {
+                try
+                {
+                    File.Delete(MainForm.DataFilePath + "\\AntiTimeOutService.InstallState");
+                }
+                catch (Exception exp)
+                {
+                    MessageBox.Show("This operation has caused an exeption:\n" + exp.Source + ": " + exp.Message, "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                MessageBox.Show("InstallState deleted successfully.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+        private void resetConfigButton_Click(object sender, EventArgs e)
+        {
+            DialogResult dg = MessageBox.Show("Do you want to reset all client configs?\nTHIS ACTION IS IRREVERSIBLE AND REQUIRE A RESTART!", "AntiTimeOut", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+            if (dg == DialogResult.OK)
+            {
+                dg = MessageBox.Show("Do you want to reset all client configs (AGAIN?)\nTHIS ACTION IS IRREVERSIBLE AND REQUIRE A RESTART!", "AntiTimeOut", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+                if (dg == DialogResult.OK)
+                {
+                    Properties.Settings.Default.Reset();
+                    Application.Restart();
+                }
+            }
+        }
+        private void syncServerConfigCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            saiTextBox.Enabled = !syncServerConfigCheckBox.Checked;
+            if (syncServerConfigCheckBox.Checked)
+            {
+                string updateTime = "1000";
+                try
+                {
+                    // Get the service interval
+                    updateTime = File.ReadAllText(MainForm.DataFilePath + "\\ServiceConfig.cfg").Split(' ')[0];
+                }
+                catch
+                {
+                }
+                saiTextBox.Text = updateTime;
+            }
+            else
+            {
+                saiTextBox.Text = "1000";
+            }
         }
     }
 }

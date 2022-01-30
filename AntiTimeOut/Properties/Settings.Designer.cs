@@ -214,5 +214,17 @@ namespace AntiTimeOut.Properties {
                 this["ootRenewInterface"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool isServerUpdateSync {
+            get {
+                return ((bool)(this["isServerUpdateSync"]));
+            }
+            set {
+                this["isServerUpdateSync"] = value;
+            }
+        }
     }
 }

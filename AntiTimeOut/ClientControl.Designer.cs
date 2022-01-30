@@ -30,7 +30,7 @@
         {
             this.dateTimeTextBox = new System.Windows.Forms.TextBox();
             this.backButton = new System.Windows.Forms.Button();
-            this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.tabControl = new System.Windows.Forms.TabControl();
             this.intervalPanel = new System.Windows.Forms.TabPage();
             this.ootRunOnceCheckBox = new System.Windows.Forms.CheckBox();
             this.ootSettingsButton = new System.Windows.Forms.Button();
@@ -45,21 +45,29 @@
             this.saiTextBox = new System.Windows.Forms.TextBox();
             this.saiSaveButton = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
-            this.handlingPanel = new System.Windows.Forms.TabPage();
+            this.configPanel = new System.Windows.Forms.TabPage();
             this.sbsModeCheckBox = new System.Windows.Forms.CheckBox();
             this.nvsModeCheckBox = new System.Windows.Forms.CheckBox();
-            this.adminRestartButton = new System.Windows.Forms.Button();
             this.systrayCheckBox = new System.Windows.Forms.CheckBox();
             this.versionTextBox = new System.Windows.Forms.TextBox();
-            this.authorLink = new System.Windows.Forms.LinkLabel();
+            this.authorLink1 = new System.Windows.Forms.LinkLabel();
             this.osStartupCheckBox = new System.Windows.Forms.CheckBox();
+            this.managementPanel = new System.Windows.Forms.TabPage();
+            this.resetConfigButton = new System.Windows.Forms.Button();
+            this.deleteInstallStateButton = new System.Windows.Forms.Button();
+            this.clearServiceLogButton = new System.Windows.Forms.Button();
+            this.showDefServiceButton = new System.Windows.Forms.Button();
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.authorLink2 = new System.Windows.Forms.LinkLabel();
+            this.adminRestartButton = new System.Windows.Forms.Button();
             this.clientSettingsWatcher = new System.IO.FileSystemWatcher();
             this.troubleshootPanel = new System.Windows.Forms.TabPage();
-            this.tabControl1.SuspendLayout();
+            this.tabControl.SuspendLayout();
             this.intervalPanel.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.troubleshootTab.SuspendLayout();
-            this.handlingPanel.SuspendLayout();
+            this.configPanel.SuspendLayout();
+            this.managementPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.clientSettingsWatcher)).BeginInit();
             this.SuspendLayout();
             // 
@@ -89,16 +97,17 @@
             this.backButton.UseVisualStyleBackColor = true;
             this.backButton.Click += new System.EventHandler(this.backButton_Click);
             // 
-            // tabControl1
+            // tabControl
             // 
-            this.tabControl1.Controls.Add(this.intervalPanel);
-            this.tabControl1.Controls.Add(this.troubleshootTab);
-            this.tabControl1.Controls.Add(this.handlingPanel);
-            this.tabControl1.Location = new System.Drawing.Point(3, 102);
-            this.tabControl1.Name = "tabControl1";
-            this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(365, 272);
-            this.tabControl1.TabIndex = 9;
+            this.tabControl.Controls.Add(this.intervalPanel);
+            this.tabControl.Controls.Add(this.troubleshootTab);
+            this.tabControl.Controls.Add(this.configPanel);
+            this.tabControl.Controls.Add(this.managementPanel);
+            this.tabControl.Location = new System.Drawing.Point(3, 102);
+            this.tabControl.Name = "tabControl";
+            this.tabControl.SelectedIndex = 0;
+            this.tabControl.Size = new System.Drawing.Size(365, 272);
+            this.tabControl.TabIndex = 9;
             // 
             // intervalPanel
             // 
@@ -229,6 +238,7 @@
             this.syncServerConfigCheckBox.TabIndex = 24;
             this.syncServerConfigCheckBox.Text = "Sync with server config";
             this.syncServerConfigCheckBox.UseVisualStyleBackColor = true;
+            this.syncServerConfigCheckBox.CheckedChanged += new System.EventHandler(this.syncServerConfigCheckBox_CheckedChanged);
             // 
             // saiTextBox
             // 
@@ -260,27 +270,27 @@
             this.label1.TabIndex = 20;
             this.label1.Text = "Service Polling Interval (ms):";
             // 
-            // handlingPanel
+            // configPanel
             // 
-            this.handlingPanel.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.handlingPanel.Controls.Add(this.sbsModeCheckBox);
-            this.handlingPanel.Controls.Add(this.nvsModeCheckBox);
-            this.handlingPanel.Controls.Add(this.adminRestartButton);
-            this.handlingPanel.Controls.Add(this.systrayCheckBox);
-            this.handlingPanel.Controls.Add(this.versionTextBox);
-            this.handlingPanel.Controls.Add(this.authorLink);
-            this.handlingPanel.Controls.Add(this.osStartupCheckBox);
-            this.handlingPanel.Location = new System.Drawing.Point(4, 25);
-            this.handlingPanel.Name = "handlingPanel";
-            this.handlingPanel.Size = new System.Drawing.Size(357, 243);
-            this.handlingPanel.TabIndex = 2;
-            this.handlingPanel.Text = "Handlings";
+            this.configPanel.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.configPanel.Controls.Add(this.sbsModeCheckBox);
+            this.configPanel.Controls.Add(this.nvsModeCheckBox);
+            this.configPanel.Controls.Add(this.systrayCheckBox);
+            this.configPanel.Controls.Add(this.adminRestartButton);
+            this.configPanel.Controls.Add(this.versionTextBox);
+            this.configPanel.Controls.Add(this.authorLink1);
+            this.configPanel.Controls.Add(this.osStartupCheckBox);
+            this.configPanel.Location = new System.Drawing.Point(4, 25);
+            this.configPanel.Name = "configPanel";
+            this.configPanel.Size = new System.Drawing.Size(357, 243);
+            this.configPanel.TabIndex = 2;
+            this.configPanel.Text = "Configurations";
             // 
             // sbsModeCheckBox
             // 
             this.sbsModeCheckBox.AutoSize = true;
             this.sbsModeCheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
-            this.sbsModeCheckBox.Location = new System.Drawing.Point(101, 89);
+            this.sbsModeCheckBox.Location = new System.Drawing.Point(102, 63);
             this.sbsModeCheckBox.Name = "sbsModeCheckBox";
             this.sbsModeCheckBox.Size = new System.Drawing.Size(149, 20);
             this.sbsModeCheckBox.TabIndex = 6;
@@ -292,29 +302,19 @@
             // 
             this.nvsModeCheckBox.AutoSize = true;
             this.nvsModeCheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
-            this.nvsModeCheckBox.Location = new System.Drawing.Point(86, 61);
+            this.nvsModeCheckBox.Location = new System.Drawing.Point(115, 92);
             this.nvsModeCheckBox.Name = "nvsModeCheckBox";
-            this.nvsModeCheckBox.Size = new System.Drawing.Size(182, 20);
+            this.nvsModeCheckBox.Size = new System.Drawing.Size(123, 20);
             this.nvsModeCheckBox.TabIndex = 5;
-            this.nvsModeCheckBox.Text = "Non-Visible Startup Mode";
+            this.nvsModeCheckBox.Text = "Start in Taskbar";
             this.nvsModeCheckBox.UseVisualStyleBackColor = true;
             this.nvsModeCheckBox.CheckedChanged += new System.EventHandler(this.nvsModeCheckBox_CheckedChanged);
-            // 
-            // adminRestartButton
-            // 
-            this.adminRestartButton.Location = new System.Drawing.Point(81, 148);
-            this.adminRestartButton.Name = "adminRestartButton";
-            this.adminRestartButton.Size = new System.Drawing.Size(196, 28);
-            this.adminRestartButton.TabIndex = 4;
-            this.adminRestartButton.Text = " Restart as Administrator";
-            this.adminRestartButton.UseVisualStyleBackColor = true;
-            this.adminRestartButton.Click += new System.EventHandler(this.adminRestartButton_Click);
             // 
             // systrayCheckBox
             // 
             this.systrayCheckBox.AutoSize = true;
             this.systrayCheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
-            this.systrayCheckBox.Location = new System.Drawing.Point(121, 117);
+            this.systrayCheckBox.Location = new System.Drawing.Point(121, 121);
             this.systrayCheckBox.Name = "systrayCheckBox";
             this.systrayCheckBox.Size = new System.Drawing.Size(112, 20);
             this.systrayCheckBox.TabIndex = 2;
@@ -336,28 +336,118 @@
             this.versionTextBox.Text = "Version X.X.X.X, Windows XX-bit, .NET XX.X ";
             this.versionTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
-            // authorLink
+            // authorLink1
             // 
-            this.authorLink.Location = new System.Drawing.Point(3, 218);
-            this.authorLink.Name = "authorLink";
-            this.authorLink.Size = new System.Drawing.Size(351, 17);
-            this.authorLink.TabIndex = 0;
-            this.authorLink.TabStop = true;
-            this.authorLink.Text = "@rashlight 2020-2022";
-            this.authorLink.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.authorLink.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.authorLink_LinkClicked);
+            this.authorLink1.Location = new System.Drawing.Point(3, 218);
+            this.authorLink1.Name = "authorLink1";
+            this.authorLink1.Size = new System.Drawing.Size(351, 17);
+            this.authorLink1.TabIndex = 0;
+            this.authorLink1.TabStop = true;
+            this.authorLink1.Text = "@rashlight 2020-2022";
+            this.authorLink1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.authorLink1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.authorLink_LinkClicked);
             // 
             // osStartupCheckBox
             // 
             this.osStartupCheckBox.AutoSize = true;
             this.osStartupCheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
-            this.osStartupCheckBox.Location = new System.Drawing.Point(64, 33);
+            this.osStartupCheckBox.Location = new System.Drawing.Point(66, 33);
             this.osStartupCheckBox.Name = "osStartupCheckBox";
             this.osStartupCheckBox.Size = new System.Drawing.Size(219, 20);
             this.osStartupCheckBox.TabIndex = 0;
             this.osStartupCheckBox.Text = "Run the program when OS starts";
             this.osStartupCheckBox.UseVisualStyleBackColor = true;
             this.osStartupCheckBox.CheckedChanged += new System.EventHandler(this.osStartupCheckBox_CheckedChanged);
+            // 
+            // managementPanel
+            // 
+            this.managementPanel.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.managementPanel.Controls.Add(this.resetConfigButton);
+            this.managementPanel.Controls.Add(this.deleteInstallStateButton);
+            this.managementPanel.Controls.Add(this.clearServiceLogButton);
+            this.managementPanel.Controls.Add(this.showDefServiceButton);
+            this.managementPanel.Controls.Add(this.textBox1);
+            this.managementPanel.Controls.Add(this.authorLink2);
+            this.managementPanel.Location = new System.Drawing.Point(4, 25);
+            this.managementPanel.Name = "managementPanel";
+            this.managementPanel.Size = new System.Drawing.Size(357, 243);
+            this.managementPanel.TabIndex = 3;
+            this.managementPanel.Text = "Management";
+            // 
+            // resetConfigButton
+            // 
+            this.resetConfigButton.Location = new System.Drawing.Point(83, 143);
+            this.resetConfigButton.Name = "resetConfigButton";
+            this.resetConfigButton.Size = new System.Drawing.Size(196, 28);
+            this.resetConfigButton.TabIndex = 10;
+            this.resetConfigButton.Text = "Reset all configurations";
+            this.resetConfigButton.UseVisualStyleBackColor = true;
+            this.resetConfigButton.Click += new System.EventHandler(this.resetConfigButton_Click);
+            // 
+            // deleteInstallStateButton
+            // 
+            this.deleteInstallStateButton.Location = new System.Drawing.Point(54, 109);
+            this.deleteInstallStateButton.Name = "deleteInstallStateButton";
+            this.deleteInstallStateButton.Size = new System.Drawing.Size(245, 28);
+            this.deleteInstallStateButton.TabIndex = 9;
+            this.deleteInstallStateButton.Text = "Delete InstallState file (migration)";
+            this.deleteInstallStateButton.UseVisualStyleBackColor = true;
+            this.deleteInstallStateButton.Click += new System.EventHandler(this.deleteInstallStateButton_Click);
+            // 
+            // clearServiceLogButton
+            // 
+            this.clearServiceLogButton.Location = new System.Drawing.Point(83, 41);
+            this.clearServiceLogButton.Name = "clearServiceLogButton";
+            this.clearServiceLogButton.Size = new System.Drawing.Size(196, 28);
+            this.clearServiceLogButton.TabIndex = 8;
+            this.clearServiceLogButton.Text = "Clear service logs";
+            this.clearServiceLogButton.UseVisualStyleBackColor = true;
+            this.clearServiceLogButton.Click += new System.EventHandler(this.clearServiceLogButton_Click);
+            // 
+            // showDefServiceButton
+            // 
+            this.showDefServiceButton.Location = new System.Drawing.Point(54, 75);
+            this.showDefServiceButton.Name = "showDefServiceButton";
+            this.showDefServiceButton.Size = new System.Drawing.Size(245, 28);
+            this.showDefServiceButton.TabIndex = 7;
+            this.showDefServiceButton.Text = "Show service informations";
+            this.showDefServiceButton.UseVisualStyleBackColor = true;
+            this.showDefServiceButton.Click += new System.EventHandler(this.showDefServiceButton_Click);
+            // 
+            // textBox1
+            // 
+            this.textBox1.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.textBox1.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textBox1.Cursor = System.Windows.Forms.Cursors.Arrow;
+            this.textBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.5F);
+            this.textBox1.Location = new System.Drawing.Point(3, 200);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.ReadOnly = true;
+            this.textBox1.Size = new System.Drawing.Size(351, 17);
+            this.textBox1.TabIndex = 6;
+            this.textBox1.Text = "Perform these action with caution.";
+            this.textBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // authorLink2
+            // 
+            this.authorLink2.Location = new System.Drawing.Point(3, 218);
+            this.authorLink2.Name = "authorLink2";
+            this.authorLink2.Size = new System.Drawing.Size(351, 17);
+            this.authorLink2.TabIndex = 5;
+            this.authorLink2.TabStop = true;
+            this.authorLink2.Text = "@rashlight 2020-2022";
+            this.authorLink2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.authorLink2.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.authorLink_LinkClicked);
+            // 
+            // adminRestartButton
+            // 
+            this.adminRestartButton.Location = new System.Drawing.Point(77, 147);
+            this.adminRestartButton.Name = "adminRestartButton";
+            this.adminRestartButton.Size = new System.Drawing.Size(196, 28);
+            this.adminRestartButton.TabIndex = 4;
+            this.adminRestartButton.Text = " Restart as Administrator";
+            this.adminRestartButton.UseVisualStyleBackColor = true;
+            this.adminRestartButton.Click += new System.EventHandler(this.adminRestartButton_Click);
             // 
             // clientSettingsWatcher
             // 
@@ -381,21 +471,23 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.Controls.Add(this.tabControl1);
+            this.Controls.Add(this.tabControl);
             this.Controls.Add(this.backButton);
             this.Controls.Add(this.dateTimeTextBox);
             this.Name = "ClientControl";
             this.Size = new System.Drawing.Size(371, 377);
             this.Load += new System.EventHandler(this.ClientControl_Load);
-            this.tabControl1.ResumeLayout(false);
+            this.tabControl.ResumeLayout(false);
             this.intervalPanel.ResumeLayout(false);
             this.intervalPanel.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.troubleshootTab.ResumeLayout(false);
             this.troubleshootTab.PerformLayout();
-            this.handlingPanel.ResumeLayout(false);
-            this.handlingPanel.PerformLayout();
+            this.configPanel.ResumeLayout(false);
+            this.configPanel.PerformLayout();
+            this.managementPanel.ResumeLayout(false);
+            this.managementPanel.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.clientSettingsWatcher)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -405,7 +497,7 @@
         #endregion
         private System.Windows.Forms.TextBox dateTimeTextBox;
         private System.Windows.Forms.Button backButton;
-        private System.Windows.Forms.TabControl tabControl1;
+        private System.Windows.Forms.TabControl tabControl;
         private System.Windows.Forms.TabPage intervalPanel;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.TextBox lastRecordTextBox;
@@ -419,9 +511,9 @@
         private System.Windows.Forms.Button saiSaveButton;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox saiTextBox;
-        private System.Windows.Forms.TabPage handlingPanel;
+        private System.Windows.Forms.TabPage configPanel;
         private System.Windows.Forms.CheckBox osStartupCheckBox;
-        private System.Windows.Forms.LinkLabel authorLink;
+        private System.Windows.Forms.LinkLabel authorLink1;
         private System.Windows.Forms.TextBox versionTextBox;
         private System.Windows.Forms.CheckBox systrayCheckBox;
         private System.Windows.Forms.Button adminRestartButton;
@@ -430,5 +522,12 @@
         private System.Windows.Forms.CheckBox ootRunOnceCheckBox;
         private System.Windows.Forms.CheckBox sbsModeCheckBox;
         private System.Windows.Forms.CheckBox syncServerConfigCheckBox;
+        private System.Windows.Forms.TabPage managementPanel;
+        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.LinkLabel authorLink2;
+        private System.Windows.Forms.Button clearServiceLogButton;
+        private System.Windows.Forms.Button showDefServiceButton;
+        private System.Windows.Forms.Button deleteInstallStateButton;
+        private System.Windows.Forms.Button resetConfigButton;
     }
 }
