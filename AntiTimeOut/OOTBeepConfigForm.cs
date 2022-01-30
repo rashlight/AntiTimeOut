@@ -37,9 +37,11 @@ namespace AntiTimeOut
             dirTextBox.Text = dir;
             DirectoryInfo di = new DirectoryInfo(@dir);
             FileInfo[] fi = di.GetFiles("*.wav");
+            string savedFile = Path.GetFileName(Properties.Settings.Default.ootBeepSFXDir);
             foreach (FileInfo file in fi)
             {
                 sfxNameListBox.Items.Add(file.Name);
+                if (savedFile == file.Name) sfxNameListBox.SelectedItem = file.Name;
             }
         }
       
@@ -62,6 +64,7 @@ namespace AntiTimeOut
                 using (System.Media.SoundPlayer sp = new System.Media.SoundPlayer(sfxName))
                 {
                     sp.Play();
+                    sp.Stop();
                 }
             }
             catch (Exception exp)

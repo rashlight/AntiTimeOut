@@ -21,6 +21,7 @@ namespace AntiTimeOut
         /// The service directory, loaded by MainForm.GetServiceDirectory()
         /// </summary>
         public static string DataFilePath = "";
+        public const string SERVICE_NAME = "Anti Time-Out Network Service";
 
         public void ChangeControl(Control currentControl, Control newControl)
         {
@@ -102,7 +103,7 @@ namespace AntiTimeOut
 
                     foreach (ManagementObject queryObj in searcher.Get())
                     {
-                        if ((string)queryObj["Name"] == "AntiTimeOut Network Service")
+                        if ((string)queryObj["Name"] == MainForm.SERVICE_NAME)
                         {
                             // For example, "drive\path_to_file\file.exe" "param1" "param2" will have
                             // index 0: empty string, index 1: drive\path_to_file\file.exe, index 2: param1, etc.

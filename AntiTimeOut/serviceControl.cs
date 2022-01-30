@@ -18,6 +18,7 @@ namespace AntiTimeOut
         WRITE_WARNING_LOG_ENDLESS = 1,
         WRITE_WARNING_LOG_ONCE = 2,
     }
+
     public enum CommandAction
     {
         CONNECTION_TEST = 128,
@@ -31,6 +32,10 @@ namespace AntiTimeOut
     public partial class ServiceControl : UserControl
     {
         MainForm mainForm;
+        /// <summary>
+        /// A variable to tell if an action is in progress
+        /// </summary>
+        private bool isInProgress = false;
 
         private Task<int> RunProcessAsync(string fileName, string arguments)
         {
@@ -95,9 +100,9 @@ namespace AntiTimeOut
         }
         private void UpdateClientStatus()
         {
-            if (ServiceExists("AntiTimeOut Network Service"))
+            if (ServiceExists(MainForm.SERVICE_NAME))
             {
-                switch (GetServiceStatus("AntiTimeOut Network Service"))
+                switch (GetServiceStatus(MainForm.SERVICE_NAME))
                 {
                     case ServiceControllerStatus.Running:
                         {
@@ -148,19 +153,30 @@ namespace AntiTimeOut
             {
                 serviceStatusTextBox.ForeColor = Color.DarkSlateGray;
                 serviceStatusTextBox.Text = "SERVICE STATUS: UNAVAILABLE";
+                
             }
         }
         private void UpdateServiceAvailability()
         {
-            if (!ServiceExists("AntiTimeOut Network Service"))
+            if (!ServiceExists(MainForm.SERVICE_NAME))
             {
                 serviceAvailTextBox.ForeColor = Color.DarkRed;
                 serviceAvailTextBox.Text = "Service is NOT INSTALLED.";
+                if (!isInProgress)
+                {
+                    installButton.Enabled = true;
+                    uninstallButton.Enabled = false;
+                }
             }
             else
             {
                 serviceAvailTextBox.ForeColor = Color.ForestGreen;
                 serviceAvailTextBox.Text = "Service is INSTALLED.";
+                if (!isInProgress)
+                {
+                    installButton.Enabled = false;
+                    uninstallButton.Enabled = true;
+                }
             }
         }
         private void UpdateServiceParameters()
@@ -224,7 +240,7 @@ namespace AntiTimeOut
             else
             {
                 if (sc.Status == ServiceControllerStatus.Paused) MessageBox.Show("Can't start action while paused, use \"Continue\" button instead.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                else MessageBox.Show("Service already started or doesn't exists.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                else MessageBox.Show("Service already started or doesn't exists.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
 
             sc.Dispose();
@@ -249,7 +265,7 @@ namespace AntiTimeOut
             }
             else
             {
-                MessageBox.Show("Service is already stopped or doesn't exists.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Service is already stopped or doesn't exists.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
 
             sc.Dispose();
@@ -274,7 +290,7 @@ namespace AntiTimeOut
             }
             else
             {
-                MessageBox.Show("Service is already paused, stopped or doesn't exists.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Service is already paused, stopped or doesn't exists.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
 
             sc.Dispose();
@@ -299,7 +315,7 @@ namespace AntiTimeOut
             }
             else
             {
-                MessageBox.Show("Service is running, stopped or doesn't exists.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Service is running, stopped or doesn't exists.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
 
             sc.Dispose();
@@ -329,6 +345,16 @@ namespace AntiTimeOut
             UpdateClientStatus();
             UpdateServiceAvailability();
 
+            // Update installation buttons
+            if (!ServiceExists(MainForm.SERVICE_NAME))
+            {
+                uninstallButton.Enabled = false;
+            }
+            else
+            {
+                installButton.Enabled = false;
+            }
+
             // Update command boxes
             commandComboBox.SelectedIndex = Properties.Settings.Default.commandSelectedIndex;
             commandTimeOutTextBox.Text = Properties.Settings.Default.commandDelay.ToString();
@@ -346,9 +372,10 @@ namespace AntiTimeOut
         }
         private async void installButton_Click(object sender, EventArgs e)
         {
+            isInProgress = true;
             backButton.Enabled = false;
             installButton.Enabled = false;
-            uninstallButton.Enabled = false;
+            tabControl.Enabled = false;
 
             installButton.Text = "Please wait...";
 
@@ -360,9 +387,9 @@ namespace AntiTimeOut
             if (dg != DialogResult.OK)
             {
                 installButton.Text = "Install";
-                installButton.Enabled = true;
-                uninstallButton.Enabled = true;
+                tabControl.Enabled = true;
                 backButton.Enabled = true;
+                isInProgress = false;
                 return;
             }
 
@@ -374,9 +401,9 @@ namespace AntiTimeOut
                 if (dg != DialogResult.OK)
                 {
                     installButton.Text = "Install";
-                    installButton.Enabled = true;
-                    uninstallButton.Enabled = true;
+                    tabControl.Enabled = true;
                     backButton.Enabled = true;
+                    isInProgress = false;
                     return;
                 }
 
@@ -387,33 +414,43 @@ namespace AntiTimeOut
             }
             
             int result = await RunProcessAsync(openFileDialog.FileName, "-i");
-            if (result == 0 && ServiceExists("AntiTimeOut Network Service"))
+            tabControl.Enabled = true;
+            if (result == 0 && ServiceExists(MainForm.SERVICE_NAME))
             {
                 MessageBox.Show("Service installed successfully.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 // Register new directory forcefully
                 Properties.Settings.Default.loadedServiceDirectory = Path.GetDirectoryName(openFileDialog.FileName);
                 Properties.Settings.Default.Save();
+                uninstallButton.Enabled = true;
             }
             else
             {
-                MessageBox.Show("Service installation failed, error code " + result + "\nCheck the event logs for more information.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Installation failed, error code " + result + "\nCheck the service installation log for more information.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                installButton.Enabled = true;
             }
 
             UpdateServiceAvailability();
 
             installButton.Text = "Install";
-
-            installButton.Enabled = true;
-            uninstallButton.Enabled = true;
             backButton.Enabled = true;
+            isInProgress = false;
         }
         private async void uninstallButton_Click(object sender, EventArgs e)
         {
+            isInProgress = true;
             backButton.Enabled = false;
-            installButton.Enabled = false;
             uninstallButton.Enabled = false;
+            tabControl.Enabled = false;
 
             uninstallButton.Text = "Please wait...";
+
+            if (MessageBox.Show("Are you sure to uninstall AntiTimeOutService?\n", "AntiTimeOut", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == DialogResult.Cancel)
+            {
+                backButton.Enabled = true;
+                tabControl.Enabled = true;
+                isInProgress = false;
+                return;
+            }
 
             string dir = string.Empty;
 
@@ -424,9 +461,9 @@ namespace AntiTimeOut
                 if (dg != DialogResult.Yes || openFileDialog.ShowDialog() != DialogResult.OK)
                 {                    
                     uninstallButton.Text = "Uninstall";
-                    installButton.Enabled = true;
-                    uninstallButton.Enabled = true;
                     backButton.Enabled = true;
+                    tabControl.Enabled = true;
+                    isInProgress = false;
                     return;
                 }
 
@@ -449,9 +486,9 @@ namespace AntiTimeOut
                 if (dg != DialogResult.OK)
                 {
                     uninstallButton.Text = "Uninstall";
-                    installButton.Enabled = true;
-                    uninstallButton.Enabled = true;
                     backButton.Enabled = true;
+                    tabControl.Enabled = true;
+                    isInProgress = false;
                     return;
                 }
 
@@ -462,22 +499,23 @@ namespace AntiTimeOut
             }
 
             int result = await RunProcessAsync(dir, "-u");
-            if (result == 0 && !ServiceExists("AntiTimeOut Network Service"))
+            tabControl.Enabled = true;
+            if (result == 0 && !ServiceExists(MainForm.SERVICE_NAME))
             {
                 MessageBox.Show("Service uninstalled successfully.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                installButton.Enabled = true;
             }
             else
             {
-                MessageBox.Show("Service uninstallation failed, error code " + result, "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Uninstallation failed, error code " + result + "\nCheck the service installation log for more information.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                uninstallButton.Enabled = true;
             }
 
             UpdateServiceAvailability();
 
             uninstallButton.Text = "Uninstall";
-
-            installButton.Enabled = true;
-            uninstallButton.Enabled = true;
             backButton.Enabled = true;
+            isInProgress = false;
         }
         private void serviceAppLinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
@@ -485,100 +523,99 @@ namespace AntiTimeOut
         }
         private async void startServiceButton_Click(object sender, EventArgs e)
         {
-            startServiceButton.Enabled = false;
-            stopServiceButton.Enabled = false;
-            pauseServiceButton.Enabled = false;
-            continueServiceButton.Enabled = false;
+            tabControl.Enabled = false;
+            backButton.Enabled = false;
 
             startServiceButton.Text = "WAIT";
 
             await Task.Run(() =>
             {
-                if (ServiceExists("AntiTimeOut Network Service"))
+                if (ServiceExists(MainForm.SERVICE_NAME))
                 {
-                    StartService("AntiTimeOut Network Service");
+                    StartService(MainForm.SERVICE_NAME);
+                }
+                else
+                {
+                    MessageBox.Show("This operation is unavailable.\nPlease check your service's installation and try again.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             });
 
             startServiceButton.Text = "Start";
 
-            startServiceButton.Enabled = true;
-            stopServiceButton.Enabled = true;
-            pauseServiceButton.Enabled = true;
-            continueServiceButton.Enabled = true;
+            backButton.Enabled = true;
+            tabControl.Enabled = true;
         }
         private async void stopServiceButton_Click(object sender, EventArgs e)
         {
-            startServiceButton.Enabled = false;
-            stopServiceButton.Enabled = false;
-            pauseServiceButton.Enabled = false;
-            continueServiceButton.Enabled = false;
+            tabControl.Enabled = false;
+            backButton.Enabled = false;
 
             stopServiceButton.Text = "WAIT";
 
             await Task.Run(() =>
             {
-                if (ServiceExists("AntiTimeOut Network Service"))
+                if (ServiceExists(MainForm.SERVICE_NAME))
                 {
-                    StopService("AntiTimeOut Network Service");
+                    StopService(MainForm.SERVICE_NAME);
+                }
+                else
+                {
+                    MessageBox.Show("This operation is unavailable.\nPlease check your service's installation and try again.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             });
 
             stopServiceButton.Text = "Stop";
 
-            startServiceButton.Enabled = true;
-            stopServiceButton.Enabled = true;
-            pauseServiceButton.Enabled = true;
-            continueServiceButton.Enabled = true;
+            backButton.Enabled = true;
+            tabControl.Enabled = true;
         }
         private async void pauseServiceButton_Click(object sender, EventArgs e)
         {
-            startServiceButton.Enabled = false;
-            stopServiceButton.Enabled = false;
-            pauseServiceButton.Enabled = false;
-            continueServiceButton.Enabled = false;
+            tabControl.Enabled = false;
+            backButton.Enabled = false;
 
             pauseServiceButton.Text = "WAIT";
 
             await Task.Run(() =>
             {
-                if (ServiceExists("AntiTimeOut Network Service"))
+                if (ServiceExists(MainForm.SERVICE_NAME))
                 {
-                    PauseService("AntiTimeOut Network Service");
+                    PauseService(MainForm.SERVICE_NAME);
+                }
+                else
+                {
+                    MessageBox.Show("This operation is unavailable.\nPlease check your service's installation and try again.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             });
 
             pauseServiceButton.Text = "Pause";
 
-            startServiceButton.Enabled = true;
-            stopServiceButton.Enabled = true;
-            pauseServiceButton.Enabled = true;
-            continueServiceButton.Enabled = true;
+            backButton.Enabled = true;
+            tabControl.Enabled = true;
         }
         private async void continueServiceButton_Click(object sender, EventArgs e)
         {
-            startServiceButton.Enabled = false;
-            stopServiceButton.Enabled = false;
-            pauseServiceButton.Enabled = false;
-            continueServiceButton.Enabled = false;
+            tabControl.Enabled = false;
+            backButton.Enabled = false;
 
             continueServiceButton.Text = "WAIT";
 
             await Task.Run(() =>
             {
-                if (ServiceExists("AntiTimeOut Network Service"))
+                if (ServiceExists(MainForm.SERVICE_NAME))
                 {
-                    ContinueService("AntiTimeOut Network Service");
+                    ContinueService(MainForm.SERVICE_NAME);
+                }
+                else
+                {
+                    MessageBox.Show("This operation is unavailable.\nPlease check your service's installation and try again.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             });
 
             continueServiceButton.Text = "Continue";
 
-            startServiceButton.Enabled = true;
-            stopServiceButton.Enabled = true;
-            pauseServiceButton.Enabled = true;
-            continueServiceButton.Enabled = true;
-
+            backButton.Enabled = true;
+            tabControl.Enabled = true;
         }
         private void skipAdminButton_Click(object sender, EventArgs e)
         {
@@ -618,13 +655,14 @@ namespace AntiTimeOut
                 return;
             }
 
-            sendButton.Enabled = false; 
+            backButton.Enabled = false;
+            tabControl.Enabled = false;
 
             await Task.Run(() =>
             {
                 try
                 {
-                    var service = new System.ServiceProcess.ServiceController("AntiTimeOut Network Service", Environment.MachineName);
+                    var service = new System.ServiceProcess.ServiceController(MainForm.SERVICE_NAME, Environment.MachineName);
                     if (service.Status == ServiceControllerStatus.Stopped || service.Status == ServiceControllerStatus.StopPending) throw new ConstraintException("Can't send command to a stopped service.");              
                     service.ExecuteCommand(index + 128);
                     if (service.Status == ServiceControllerStatus.Running || service.Status == ServiceControllerStatus.StartPending)
@@ -648,7 +686,9 @@ namespace AntiTimeOut
             Properties.Settings.Default.Save();
 
             commandConfirmCheckBox.Checked = false;
-            sendButton.Enabled = true;
+
+            backButton.Enabled = true;
+            tabControl.Enabled = true;
         }
         private void paramChangeOnceButton_Click(object sender, EventArgs e)
         {

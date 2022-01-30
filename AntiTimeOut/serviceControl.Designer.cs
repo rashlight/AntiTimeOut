@@ -31,7 +31,7 @@
             this.components = new System.ComponentModel.Container();
             this.serviceStatusTextBox = new System.Windows.Forms.TextBox();
             this.backButton = new System.Windows.Forms.Button();
-            this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.tabControl = new System.Windows.Forms.TabControl();
             this.installationPage = new System.Windows.Forms.TabPage();
             this.uninstallButton = new System.Windows.Forms.Button();
             this.serviceAvailTextBox = new System.Windows.Forms.TextBox();
@@ -69,7 +69,7 @@
             this.intervalTextBox = new System.Windows.Forms.TextBox();
             this.statusTimer = new System.Windows.Forms.Timer(this.components);
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
-            this.tabControl1.SuspendLayout();
+            this.tabControl.SuspendLayout();
             this.installationPage.SuspendLayout();
             this.conditionPage.SuspendLayout();
             this.adminBlockPanel.SuspendLayout();
@@ -103,17 +103,17 @@
             this.backButton.UseVisualStyleBackColor = true;
             this.backButton.Click += new System.EventHandler(this.backButton_Click);
             // 
-            // tabControl1
+            // tabControl
             // 
-            this.tabControl1.Controls.Add(this.installationPage);
-            this.tabControl1.Controls.Add(this.conditionPage);
-            this.tabControl1.Controls.Add(this.commandsPage);
-            this.tabControl1.Controls.Add(this.paramPage);
-            this.tabControl1.Location = new System.Drawing.Point(3, 102);
-            this.tabControl1.Name = "tabControl1";
-            this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(365, 272);
-            this.tabControl1.TabIndex = 8;
+            this.tabControl.Controls.Add(this.installationPage);
+            this.tabControl.Controls.Add(this.conditionPage);
+            this.tabControl.Controls.Add(this.commandsPage);
+            this.tabControl.Controls.Add(this.paramPage);
+            this.tabControl.Location = new System.Drawing.Point(3, 102);
+            this.tabControl.Name = "tabControl";
+            this.tabControl.SelectedIndex = 0;
+            this.tabControl.Size = new System.Drawing.Size(365, 272);
+            this.tabControl.TabIndex = 8;
             // 
             // installationPage
             // 
@@ -506,13 +506,13 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.Controls.Add(this.tabControl1);
+            this.Controls.Add(this.tabControl);
             this.Controls.Add(this.backButton);
             this.Controls.Add(this.serviceStatusTextBox);
             this.Name = "ServiceControl";
             this.Size = new System.Drawing.Size(371, 377);
             this.Load += new System.EventHandler(this.ServiceControl_Load);
-            this.tabControl1.ResumeLayout(false);
+            this.tabControl.ResumeLayout(false);
             this.installationPage.ResumeLayout(false);
             this.installationPage.PerformLayout();
             this.conditionPage.ResumeLayout(false);
@@ -532,7 +532,7 @@
 
         private System.Windows.Forms.TextBox serviceStatusTextBox;
         private System.Windows.Forms.Button backButton;
-        private System.Windows.Forms.TabControl tabControl1;
+        private System.Windows.Forms.TabControl tabControl;
         private System.Windows.Forms.TabPage commandsPage;
         private System.Windows.Forms.ComboBox commandComboBox;
         private System.Windows.Forms.TabPage paramPage;

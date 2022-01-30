@@ -30,9 +30,9 @@ namespace AntiTimeOut
 
         private void UpdateClientStatus()
         {
-            if (ServiceExists("AntiTimeOut Network Service"))
+            if (ServiceExists(MainForm.SERVICE_NAME))
             {
-                switch (GetServiceStatus("AntiTimeOut Network Service"))
+                switch (GetServiceStatus(MainForm.SERVICE_NAME))
                 {
                     case ServiceControllerStatus.Running:
                         {

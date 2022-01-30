@@ -60,7 +60,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>favicon_black.ico</ApplicationIcon>
+    <ApplicationIcon>favicon_white.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestCertificateThumbprint>52F365312D5855A61AC4FA614AB17C7DAABF5569</ManifestCertificateThumbprint>

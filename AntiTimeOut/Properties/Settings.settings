@@ -20,9 +20,6 @@
     <Setting Name="isRunOnceMode" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="ootRenewInterface" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
     <Setting Name="ootRenewSSID" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
@@ -48,6 +45,9 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="loadedServiceDirectory" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="ootRenewInterface" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
   </Settings>

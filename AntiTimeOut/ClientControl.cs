@@ -78,7 +78,7 @@ namespace AntiTimeOut
         }
         /// <summary>
         /// Updates the ServiceStatus.log infomation to Live Update.
-        /// For more information, check the ATOHelp.chm file.
+        /// For more information, check the Anti Time-Out Client wiki.
         /// </summary>
         private void UpdateStatus()
         {
@@ -159,7 +159,7 @@ namespace AntiTimeOut
         }
         private void ootSaveButton_Click(object sender, EventArgs e)
         {
-            if (ootComboBox.SelectedIndex == -1)
+            if (ootComboBox.SelectedIndex < 0)
             {
                 MessageBox.Show("Choose an Out-Of-Time action to continue...", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
@@ -178,28 +178,16 @@ namespace AntiTimeOut
                 case ServiceError.DO_NOTHING:
                     break;
                 case ServiceError.BEEP:
-                    if (ootbcf != null && ootbcf.DialogResult == DialogResult.OK)
-                    {
-                        Properties.Settings.Default.ootBeepSFXDir = ootbcf.sfxName;
-                        Properties.Settings.Default.Save();
-                    }
-                    else
+                    if (ootbcf == null || ootbcf.DialogResult != DialogResult.OK)
                     {
                         MessageBox.Show("Parameters not set! Go to \"Settings...\" button to set options.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         return;
                     }
                     break;
                 case ServiceError.RESET_WLAN_CONNECTION:
-                    if (ootrcf != null && ootrcf.DialogResult == DialogResult.OK)
+                    if (ootrcf == null || ootrcf.DialogResult != DialogResult.OK)
                     {
-                        Properties.Settings.Default.ootRenewName = ootrcf.ProfileName;
-                        Properties.Settings.Default.ootRenewSSID = ootrcf.SSID;
-                        Properties.Settings.Default.ootRenewInterface = ootrcf.InterfaceName;
-                        Properties.Settings.Default.Save();
-                    }
-                    else
-                    {
-                        MessageBox.Show("Parameter(s) not set! Go to \"Settings...\" button to set options.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show("Parameters not set! Go to \"Settings...\" button to set options.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         return;
                     }
                     break;
@@ -218,7 +206,7 @@ namespace AntiTimeOut
             {
                 Properties.Settings.Default.ootSelectedModeIndex = 0;
                 Properties.Settings.Default.isRunOnceMode = true;
-                MessageBox.Show("An unexpected operation has been detected: " + exp.ToString() + "Saving default fallback action to " + Enum.GetName(typeof(ServiceError), 0), "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("An unexpected exception has been detected: " + exp.ToString() + "Saving default fallback action to " + Enum.GetName(typeof(ServiceError), 0), "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {

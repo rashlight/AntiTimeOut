@@ -30,7 +30,7 @@
         {
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
-            this.ssidTextBox = new System.Windows.Forms.TextBox();
+            this.networkSSIDTextBox = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.networkInterfaceComboBox = new System.Windows.Forms.ComboBox();
             this.label4 = new System.Windows.Forms.Label();
@@ -45,9 +45,9 @@
             this.label1.Font = new System.Drawing.Font("Red Hat Display", 10F);
             this.label1.Location = new System.Drawing.Point(12, 49);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(165, 22);
+            this.label1.Size = new System.Drawing.Size(148, 22);
             this.label1.TabIndex = 1;
-            this.label1.Text = "1: Network Name: (*)";
+            this.label1.Text = "1: Profile Name: (*)";
             // 
             // label2
             // 
@@ -59,13 +59,13 @@
             this.label2.TabIndex = 3;
             this.label2.Text = "2: SSID:";
             // 
-            // ssidTextBox
+            // networkSSIDTextBox
             // 
-            this.ssidTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
-            this.ssidTextBox.Location = new System.Drawing.Point(82, 78);
-            this.ssidTextBox.Name = "ssidTextBox";
-            this.ssidTextBox.Size = new System.Drawing.Size(468, 23);
-            this.ssidTextBox.TabIndex = 2;
+            this.networkSSIDTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
+            this.networkSSIDTextBox.Location = new System.Drawing.Point(82, 78);
+            this.networkSSIDTextBox.Name = "networkSSIDTextBox";
+            this.networkSSIDTextBox.Size = new System.Drawing.Size(468, 23);
+            this.networkSSIDTextBox.TabIndex = 2;
             // 
             // label3
             // 
@@ -90,19 +90,19 @@
             // 
             this.label4.AutoSize = true;
             this.label4.Font = new System.Drawing.Font("Red Hat Display", 12F);
-            this.label4.Location = new System.Drawing.Point(34, 11);
+            this.label4.Location = new System.Drawing.Point(190, 12);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(489, 26);
+            this.label4.Size = new System.Drawing.Size(175, 26);
             this.label4.TabIndex = 8;
-            this.label4.Text = "(*): Required, SSID & Interface might be auto-selected.";
+            this.label4.Text = "(*): Required fields";
             this.label4.UseMnemonic = false;
             // 
             // networkNameTextBox
             // 
             this.networkNameTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
-            this.networkNameTextBox.Location = new System.Drawing.Point(183, 49);
+            this.networkNameTextBox.Location = new System.Drawing.Point(166, 49);
             this.networkNameTextBox.Name = "networkNameTextBox";
-            this.networkNameTextBox.Size = new System.Drawing.Size(367, 23);
+            this.networkNameTextBox.Size = new System.Drawing.Size(384, 23);
             this.networkNameTextBox.TabIndex = 9;
             // 
             // cancelButton
@@ -140,11 +140,12 @@
             this.Controls.Add(this.networkInterfaceComboBox);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
-            this.Controls.Add(this.ssidTextBox);
+            this.Controls.Add(this.networkSSIDTextBox);
             this.Controls.Add(this.label1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Name = "OOTRenewConfigForm";
             this.Text = "AntiTimeOut - Network Config";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OOTRenewConfigForm_FormClosing);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -153,12 +154,12 @@
         #endregion
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.TextBox ssidTextBox;
+        private System.Windows.Forms.TextBox networkSSIDTextBox;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.ComboBox networkInterfaceComboBox;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.TextBox networkNameTextBox;
         private System.Windows.Forms.Button cancelButton;
         private System.Windows.Forms.Button OKButton;
+        public System.Windows.Forms.ComboBox networkInterfaceComboBox;
     }
 }
