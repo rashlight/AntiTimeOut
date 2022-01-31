@@ -15,12 +15,14 @@ namespace AntiTimeOut
     {
         THROW_EXCEPTION = -1,
         DO_NOTHING = 0,
-        WRITE_WARNING_LOG = 1,
+        WRITE_WARNING_LOG_ENDLESS = 1,
+        WRITE_WARNING_LOG_ONCE = 2,
     }
+
     public enum CommandAction
     {
         CONNECTION_TEST = 128,
-        ERASE_MEM_EVENTLOGS = 129,
+        ERASE_EVENTLOGS = 129,
         CHANGE_LOGLVL_NONE = 130,
         CHANGE_LOGLVL_CONSERVATIVE = 131,
         CHANGE_LOGLVL_NORMAL = 132,
@@ -30,6 +32,15 @@ namespace AntiTimeOut
     public partial class ServiceControl : UserControl
     {
         MainForm mainForm;
+        /// <summary>
+        /// A variable to tell if an action is in progress
+        /// </summary>
+        private bool isInProgress = false;
+
+        private const int OVER_INTERVAL = 3600000;
+        private const int OVER_TIMEOUT = 3600000;
+        private const int OVER_FAILURE_LIMIT = 60;
+        private const int OVER_CMD_TIMEOUT = 3600000;
 
         private Task<int> RunProcessAsync(string fileName, string arguments)
         {
@@ -64,20 +75,6 @@ namespace AntiTimeOut
         {
             InitializeComponent();
             mainForm = main;
-
-            try 
-            {
-                statusTimer.Interval = Properties.Settings.Default.servicePollingTime;
-            }
-            catch
-            {
-                Properties.Settings.Default.servicePollingTime = 1000;
-            }          
-            
-            if (!WindowsIdentity.GetCurrent().Owner.IsWellKnown(WellKnownSidType.BuiltinAdministratorsSid))
-            {
-                adminBlockPanel.Visible = true;
-            }
         }
 
         private bool IsDigitsOnly(string str)
@@ -94,9 +91,9 @@ namespace AntiTimeOut
         }
         private void UpdateClientStatus()
         {
-            if (ServiceExists("AntiTimeOut Network Service"))
+            if (ServiceExists(MainForm.SERVICE_NAME))
             {
-                switch (GetServiceStatus("AntiTimeOut Network Service"))
+                switch (GetServiceStatus(MainForm.SERVICE_NAME))
                 {
                     case ServiceControllerStatus.Running:
                         {
@@ -147,24 +144,54 @@ namespace AntiTimeOut
             {
                 serviceStatusTextBox.ForeColor = Color.DarkSlateGray;
                 serviceStatusTextBox.Text = "SERVICE STATUS: UNAVAILABLE";
+                
             }
         }
         private void UpdateServiceAvailability()
         {
-            if (!ServiceExists("AntiTimeOut Network Service"))
+            if (!ServiceExists(MainForm.SERVICE_NAME))
             {
                 serviceAvailTextBox.ForeColor = Color.DarkRed;
-                serviceAvailTextBox.Text = "ATOService is NOT INSTALLED.";
+                serviceAvailTextBox.Text = "Service is NOT INSTALLED.";
+                if (!isInProgress)
+                {
+                    installButton.Enabled = true;
+                    uninstallButton.Enabled = false;
+                }
             }
             else
             {
                 serviceAvailTextBox.ForeColor = Color.ForestGreen;
-                serviceAvailTextBox.Text = "ATOService is INSTALLED.";
+                serviceAvailTextBox.Text = "Service is INSTALLED.";
+                if (!isInProgress)
+                {
+                    installButton.Enabled = false;
+                    uninstallButton.Enabled = true;
+                }
             }
         }
         private void UpdateServiceParameters()
         {
-            failModeComboBox.SelectedIndex = 0;
+            try
+            {
+                string[] parameters = File.ReadAllText(MainForm.DataFilePath + "\\ServiceConfig.cfg").Split(' ');
+                intervalTextBox.Text = parameters[0];
+                timeOutTextBox.Text = parameters[1];
+                urlTextBox.Text = parameters[2];
+                failureLimitTextBox.Text = parameters[3];
+                failModeComboBox.SelectedIndex = 0;
+                for (int i = 0; i < failModeComboBox.Items.Count; i++)
+                {
+                    if (parameters[4].ToString() == failModeComboBox.Items[i].ToString())
+                    {
+                        failModeComboBox.SelectedIndex = i;
+                        break;
+                    }
+                }
+            }
+            catch
+            {
+            }
         }
 
         public bool ServiceExists(string ServiceName)
@@ -223,7 +250,7 @@ namespace AntiTimeOut
             else
             {
                 if (sc.Status == ServiceControllerStatus.Paused) MessageBox.Show("Can't start action while paused, use \"Continue\" button instead.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                else MessageBox.Show("Service already started or doesn't exists.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                else MessageBox.Show("Service already started or doesn't exists.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
 
             sc.Dispose();
@@ -248,7 +275,7 @@ namespace AntiTimeOut
             }
             else
             {
-                MessageBox.Show("Service is already stopped or doesn't exists.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Service is already stopped or doesn't exists.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
 
             sc.Dispose();
@@ -273,7 +300,7 @@ namespace AntiTimeOut
             }
             else
             {
-                MessageBox.Show("Service is already paused, stopped or doesn't exists.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Service is already paused, stopped or doesn't exists.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
 
             sc.Dispose();
@@ -298,7 +325,7 @@ namespace AntiTimeOut
             }
             else
             {
-                MessageBox.Show("Service is running, stopped or doesn't exists.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Service is running, stopped or doesn't exists.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
 
             sc.Dispose();
@@ -316,6 +343,20 @@ namespace AntiTimeOut
 
         private void ServiceControl_Load(object sender, EventArgs e)
         {
+            try
+            {
+                if (Properties.Settings.Default.isServerUpdateSync)
+                {
+                    // Get the service interval
+                    statusTimer.Interval = Convert.ToInt32(File.ReadAllText(MainForm.DataFilePath + "\\ServiceConfig.cfg").Split(' ')[0]);
+                }
+                else statusTimer.Interval = Properties.Settings.Default.servicePollingTime;
+            }
+            catch
+            {
+                Properties.Settings.Default.servicePollingTime = 1000;
+            }
+
             foreach (string action in Enum.GetNames(typeof(CommandAction)))
             {
                 commandComboBox.Items.Add(action);
@@ -325,8 +366,23 @@ namespace AntiTimeOut
                 failModeComboBox.Items.Add(action);
             }
 
+            if (!WindowsIdentity.GetCurrent().Owner.IsWellKnown(WellKnownSidType.BuiltinAdministratorsSid))
+            {
+                adminBlockPanel.Visible = true;
+            }
+
             UpdateClientStatus();
             UpdateServiceAvailability();
+
+            // Update installation buttons
+            if (!ServiceExists(MainForm.SERVICE_NAME))
+            {
+                uninstallButton.Enabled = false;
+            }
+            else
+            {
+                installButton.Enabled = false;
+            }
 
             // Update command boxes
             commandComboBox.SelectedIndex = Properties.Settings.Default.commandSelectedIndex;
@@ -345,52 +401,38 @@ namespace AntiTimeOut
         }
         private async void installButton_Click(object sender, EventArgs e)
         {
+            isInProgress = true;
             backButton.Enabled = false;
             installButton.Enabled = false;
-            uninstallButton.Enabled = false;
+            tabControl.Enabled = false;
 
             installButton.Text = "Please wait...";
 
-            if (MessageBox.Show("Install AntiTimeoutService?", "AntiTimeOut", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+            if (File.Exists(MainForm.DataFilePath + "\\AntiTimeOutService.exe"))
+            {
+                openFileDialog.InitialDirectory = MainForm.DataFilePath;
+            }
+            DialogResult dg = openFileDialog.ShowDialog();
+            if (dg != DialogResult.OK)
             {
                 installButton.Text = "Install";
-                installButton.Enabled = true;
-                uninstallButton.Enabled = true;
+                tabControl.Enabled = true;
                 backButton.Enabled = true;
+                isInProgress = false;
                 return;
             }
 
-            if (!File.Exists(Application.StartupPath + "\\Service\\AntiTimeOutService.exe"))
-            {
-                DialogResult dg = MessageBox.Show("Can't execute " + Application.StartupPath + "\\Service\\AntiTimeOutService.exe." +
-                    "\nDo you want to specify location of AntiTimeOutService.exe?", "AntiTimeOut", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-                if (dg != DialogResult.Yes || openFileDialog.ShowDialog() != DialogResult.OK)
-                {
-                    installButton.Text = "Install";
-                    installButton.Enabled = true;
-                    uninstallButton.Enabled = true;
-                    backButton.Enabled = true;
-                    return;
-                }
-
-                MessageBox.Show(openFileDialog.FileName);
-            }
-            else 
-            {
-                openFileDialog.FileName = Application.StartupPath + "\\Service\\AntiTimeOutService.exe";
-            } 
-
             if (Process.GetProcessesByName("mmc").Length > 0)
             {
-                DialogResult dg = MessageBox.Show("In order to complete this installation, Microsoft Management Console must be terminated." +
+                dg = MessageBox.Show("In order to complete this installation, Microsoft Management Console must be terminated." +
                 "\nClick \"OK\" to terminate ALL mmc.exe processes and continue, or \"Cancel\" to exit.", "AntiTimeOut", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
 
                 if (dg != DialogResult.OK)
                 {
                     installButton.Text = "Install";
-                    installButton.Enabled = true;
-                    uninstallButton.Enabled = true;
+                    tabControl.Enabled = true;
                     backButton.Enabled = true;
+                    isInProgress = false;
                     return;
                 }
 
@@ -401,64 +443,69 @@ namespace AntiTimeOut
             }
             
             int result = await RunProcessAsync(openFileDialog.FileName, "-i");
-            if (result == 0 && ServiceExists("AntiTimeOut Network Service"))
+            tabControl.Enabled = true;
+            if (result == 0 && ServiceExists(MainForm.SERVICE_NAME))
             {
-                Properties.Settings.Default.loadedServiceDirectory = openFileDialog.FileName;
-                Properties.Settings.Default.Save();
                 MessageBox.Show("Service installed successfully.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                // Register new directory forcefully
+                Properties.Settings.Default.loadedServiceDirectory = Path.GetDirectoryName(openFileDialog.FileName);
+                Properties.Settings.Default.Save();
+                MainForm.DataFilePath = Properties.Settings.Default.loadedServiceDirectory;
+                uninstallButton.Enabled = true;
             }
             else
             {
-                MessageBox.Show("Service installation failed, error code " + result + "\nCheck the log for more information.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Installation failed, error code " + result + "\nCheck the service installation log for more information.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                installButton.Enabled = true;
             }
 
             UpdateServiceAvailability();
 
             installButton.Text = "Install";
-
-            installButton.Enabled = true;
-            uninstallButton.Enabled = true;
             backButton.Enabled = true;
+            isInProgress = false;
         }
         private async void uninstallButton_Click(object sender, EventArgs e)
         {
+            isInProgress = true;
             backButton.Enabled = false;
-            installButton.Enabled = false;
             uninstallButton.Enabled = false;
+            tabControl.Enabled = false;
 
             uninstallButton.Text = "Please wait...";
 
+            if (MessageBox.Show("Are you sure to uninstall AntiTimeOutService?\n", "AntiTimeOut", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == DialogResult.Cancel)
+            {
+                backButton.Enabled = true;
+                tabControl.Enabled = true;
+                isInProgress = false;
+                return;
+            }
+
             string dir = string.Empty;
 
-            if (MessageBox.Show("Uninstall AntiTimeoutService?\nSome functions in this client will be limited.", "AntiTimeOut", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No) 
+            if (!File.Exists(MainForm.DataFilePath + "\\AntiTimeOutService.exe"))
             {
-                uninstallButton.Text = "Uninstall";
-                installButton.Enabled = true;
-                uninstallButton.Enabled = true;
-                backButton.Enabled = true;
-                return;
-            } 
-
-            if (!File.Exists(Properties.Settings.Default.loadedServiceDirectory))
-            {
-                DialogResult dg = MessageBox.Show("Can't execute " + Application.StartupPath + "\\Service\\AntiTimeOutService.exe." +
+                DialogResult dg = MessageBox.Show("Can't execute " + MainForm.DataFilePath + "\\AntiTimeOutService.exe" +
                     "\nDo you want to specify location of AntiTimeOutService.exe?", "AntiTimeOut", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                 if (dg != DialogResult.Yes || openFileDialog.ShowDialog() != DialogResult.OK)
                 {                    
                     uninstallButton.Text = "Uninstall";
-                    installButton.Enabled = true;
-                    uninstallButton.Enabled = true;
                     backButton.Enabled = true;
+                    tabControl.Enabled = true;
+                    isInProgress = false;
                     return;
                 }
-                else
-                {
-                    dir = openFileDialog.FileName;
-                }
+
+                dir = openFileDialog.FileName;
+
+                // Register new directory forcefully
+                Properties.Settings.Default.loadedServiceDirectory = Path.GetDirectoryName(openFileDialog.FileName);
+                Properties.Settings.Default.Save();
             }
             else
             {
-                dir = Properties.Settings.Default.loadedServiceDirectory;
+                dir = MainForm.DataFilePath + "\\AntiTimeOutService.exe";
             }
 
             if (Process.GetProcessesByName("mmc").Length > 0)
@@ -469,9 +516,9 @@ namespace AntiTimeOut
                 if (dg != DialogResult.OK)
                 {
                     uninstallButton.Text = "Uninstall";
-                    installButton.Enabled = true;
-                    uninstallButton.Enabled = true;
                     backButton.Enabled = true;
+                    tabControl.Enabled = true;
+                    isInProgress = false;
                     return;
                 }
 
@@ -482,22 +529,23 @@ namespace AntiTimeOut
             }
 
             int result = await RunProcessAsync(dir, "-u");
-            if (result == 0 && !ServiceExists("AntiTimeOut Network Service"))
+            tabControl.Enabled = true;
+            if (result == 0 && !ServiceExists(MainForm.SERVICE_NAME))
             {
                 MessageBox.Show("Service uninstalled successfully.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                installButton.Enabled = true;
             }
             else
             {
-                MessageBox.Show("Service uninstallation failed, error code " + result, "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Uninstallation failed, error code " + result + "\nCheck the service installation log for more information.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                uninstallButton.Enabled = true;
             }
 
             UpdateServiceAvailability();
 
             uninstallButton.Text = "Uninstall";
-
-            installButton.Enabled = true;
-            uninstallButton.Enabled = true;
             backButton.Enabled = true;
+            isInProgress = false;
         }
         private void serviceAppLinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
@@ -505,100 +553,99 @@ namespace AntiTimeOut
         }
         private async void startServiceButton_Click(object sender, EventArgs e)
         {
-            startServiceButton.Enabled = false;
-            stopServiceButton.Enabled = false;
-            pauseServiceButton.Enabled = false;
-            continueServiceButton.Enabled = false;
+            tabControl.Enabled = false;
+            backButton.Enabled = false;
 
             startServiceButton.Text = "WAIT";
 
             await Task.Run(() =>
             {
-                if (ServiceExists("AntiTimeOut Network Service"))
+                if (ServiceExists(MainForm.SERVICE_NAME))
                 {
-                    StartService("AntiTimeOut Network Service");
+                    StartService(MainForm.SERVICE_NAME);
+                }
+                else
+                {
+                    MessageBox.Show("This operation is unavailable.\nPlease check your service's installation and try again.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             });
 
             startServiceButton.Text = "Start";
 
-            startServiceButton.Enabled = true;
-            stopServiceButton.Enabled = true;
-            pauseServiceButton.Enabled = true;
-            continueServiceButton.Enabled = true;
+            backButton.Enabled = true;
+            tabControl.Enabled = true;
         }
         private async void stopServiceButton_Click(object sender, EventArgs e)
         {
-            startServiceButton.Enabled = false;
-            stopServiceButton.Enabled = false;
-            pauseServiceButton.Enabled = false;
-            continueServiceButton.Enabled = false;
+            tabControl.Enabled = false;
+            backButton.Enabled = false;
 
             stopServiceButton.Text = "WAIT";
 
             await Task.Run(() =>
             {
-                if (ServiceExists("AntiTimeOut Network Service"))
+                if (ServiceExists(MainForm.SERVICE_NAME))
                 {
-                    StopService("AntiTimeOut Network Service");
+                    StopService(MainForm.SERVICE_NAME);
+                }
+                else
+                {
+                    MessageBox.Show("This operation is unavailable.\nPlease check your service's installation and try again.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             });
 
             stopServiceButton.Text = "Stop";
 
-            startServiceButton.Enabled = true;
-            stopServiceButton.Enabled = true;
-            pauseServiceButton.Enabled = true;
-            continueServiceButton.Enabled = true;
+            backButton.Enabled = true;
+            tabControl.Enabled = true;
         }
         private async void pauseServiceButton_Click(object sender, EventArgs e)
         {
-            startServiceButton.Enabled = false;
-            stopServiceButton.Enabled = false;
-            pauseServiceButton.Enabled = false;
-            continueServiceButton.Enabled = false;
+            tabControl.Enabled = false;
+            backButton.Enabled = false;
 
             pauseServiceButton.Text = "WAIT";
 
             await Task.Run(() =>
             {
-                if (ServiceExists("AntiTimeOut Network Service"))
+                if (ServiceExists(MainForm.SERVICE_NAME))
                 {
-                    PauseService("AntiTimeOut Network Service");
+                    PauseService(MainForm.SERVICE_NAME);
+                }
+                else
+                {
+                    MessageBox.Show("This operation is unavailable.\nPlease check your service's installation and try again.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             });
 
             pauseServiceButton.Text = "Pause";
 
-            startServiceButton.Enabled = true;
-            stopServiceButton.Enabled = true;
-            pauseServiceButton.Enabled = true;
-            continueServiceButton.Enabled = true;
+            backButton.Enabled = true;
+            tabControl.Enabled = true;
         }
         private async void continueServiceButton_Click(object sender, EventArgs e)
         {
-            startServiceButton.Enabled = false;
-            stopServiceButton.Enabled = false;
-            pauseServiceButton.Enabled = false;
-            continueServiceButton.Enabled = false;
+            tabControl.Enabled = false;
+            backButton.Enabled = false;
 
             continueServiceButton.Text = "WAIT";
 
             await Task.Run(() =>
             {
-                if (ServiceExists("AntiTimeOut Network Service"))
+                if (ServiceExists(MainForm.SERVICE_NAME))
                 {
-                    ContinueService("AntiTimeOut Network Service");
+                    ContinueService(MainForm.SERVICE_NAME);
+                }
+                else
+                {
+                    MessageBox.Show("This operation is unavailable.\nPlease check your service's installation and try again.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             });
 
             continueServiceButton.Text = "Continue";
 
-            startServiceButton.Enabled = true;
-            stopServiceButton.Enabled = true;
-            pauseServiceButton.Enabled = true;
-            continueServiceButton.Enabled = true;
-
+            backButton.Enabled = true;
+            tabControl.Enabled = true;
         }
         private void skipAdminButton_Click(object sender, EventArgs e)
         {
@@ -625,10 +672,19 @@ namespace AntiTimeOut
             {
                 timeOut = Convert.ToInt32(commandTimeOutTextBox.Text);
                 if (timeOut <= 0) throw new ArgumentOutOfRangeException("The timeout cannot be smaller or equals to 0.");
+                if (timeOut >= OVER_CMD_TIMEOUT)
+                {
+                    TimeSpan span = new TimeSpan(0, 0, 0, 0, timeOut);
+                    string beautifySpan = $"{span.Days} days, {span.Hours} hours, {span.Seconds} seconds and {span.Milliseconds} ms.";
+                    DialogResult dg = MessageBox.Show(
+                        "You are trying to set command timeout to\n" + beautifySpan +
+                        "\nAre you sure to do this?", "AntiTimeOut", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+                    if (dg != DialogResult.OK) return;
+                }
             }
             catch
             {
-                MessageBox.Show("The timeout value is out of range (1 to " + int.MaxValue + ")", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("The timeout value is out of range! (1 to " + int.MaxValue + ")", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -638,13 +694,14 @@ namespace AntiTimeOut
                 return;
             }
 
-            sendButton.Enabled = false; 
+            backButton.Enabled = false;
+            tabControl.Enabled = false;
 
             await Task.Run(() =>
             {
                 try
                 {
-                    var service = new System.ServiceProcess.ServiceController("AntiTimeOut Network Service", Environment.MachineName);
+                    var service = new System.ServiceProcess.ServiceController(MainForm.SERVICE_NAME, Environment.MachineName);
                     if (service.Status == ServiceControllerStatus.Stopped || service.Status == ServiceControllerStatus.StopPending) throw new ConstraintException("Can't send command to a stopped service.");              
                     service.ExecuteCommand(index + 128);
                     if (service.Status == ServiceControllerStatus.Running || service.Status == ServiceControllerStatus.StartPending)
@@ -668,11 +725,13 @@ namespace AntiTimeOut
             Properties.Settings.Default.Save();
 
             commandConfirmCheckBox.Checked = false;
-            sendButton.Enabled = true;
+
+            backButton.Enabled = true;
+            tabControl.Enabled = true;
         }
         private void paramChangeOnceButton_Click(object sender, EventArgs e)
         {
-            if (!IsDigitsOnly(intervalTextBox.Text) || !IsDigitsOnly(timeOutTextBox.Text) || !IsDigitsOnly(failtureLimitTextBox.Text))
+            if (!IsDigitsOnly(intervalTextBox.Text) || !IsDigitsOnly(timeOutTextBox.Text) || !IsDigitsOnly(failureLimitTextBox.Text))
             {
                 MessageBox.Show("Interval (1), Timeout (2) or Failure Limit (4) is in incorrect format!", "AntiTImeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
@@ -685,7 +744,7 @@ namespace AntiTimeOut
 
             if (failModeComboBox.SelectedIndex < 0)
             {
-                MessageBox.Show("Choose a failture mode (5) to continue...", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Choose a failure mode (5) to continue...", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -699,36 +758,78 @@ namespace AntiTimeOut
             {
                 interval = Convert.ToInt32(intervalTextBox.Text);
                 timeOut = Convert.ToInt32(timeOutTextBox.Text);
-                failLimit = Convert.ToUInt64(failtureLimitTextBox.Text);
+                failLimit = Convert.ToUInt64(failureLimitTextBox.Text);
 
                 ServiceConfigForm scf = new ServiceConfigForm(interval, timeOut, link, failLimit, failMode);
                 scf.ShowDialog();
             }
             catch (Exception exp)
             {
-                MessageBox.Show(exp.Source + ": " + exp.Message, "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("This operation has caused an exeption:\n" + exp.Source + ": " + exp.Message, "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
         }
         private void paramChangePermentButton_Click(object sender, EventArgs e)
         {
-            if (!IsDigitsOnly(intervalTextBox.Text) || !IsDigitsOnly(timeOutTextBox.Text) || !IsDigitsOnly(failtureLimitTextBox.Text))
+            // Values checking
+            if (!IsDigitsOnly(intervalTextBox.Text) || !IsDigitsOnly(timeOutTextBox.Text) || !IsDigitsOnly(failureLimitTextBox.Text))
             {
-                MessageBox.Show("Interval(1), Timeout(2) or Failure Limit(4) is in incorrect format!", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Interval(1), Timeout(2) or/and Failure Limit(4) is in incorrect format!", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
-            }
-
-            if (Convert.ToInt32(intervalTextBox.Text) <= 0 || Convert.ToInt32(timeOutTextBox.Text) < 0)
-            {
-                MessageBox.Show("Interval(1), Timeout(2) or Failure Limit(4) is not in range (1 -> " + int.MaxValue + ")", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);            
             }
 
             if (failModeComboBox.SelectedIndex < 0)
             {
-                MessageBox.Show("Choose a failture mode (5) to continue...", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Choose a failure mode (5) to continue...", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
+            try
+            {
+                if (Convert.ToInt32(intervalTextBox.Text) <= 0 || Convert.ToInt32(timeOutTextBox.Text) <= 0 || Convert.ToInt32(failureLimitTextBox.Text) <= 0)
+                {
+                    MessageBox.Show("Interval(1), Timeout(2) or/and Failure Limit(4) is not in range! (1 -> " + int.MaxValue + ")", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+            }
+            catch
+            {
+                MessageBox.Show("Interval(1), Timeout(2) or/and Failure Limit(4) is not in range! (1 -> " + int.MaxValue + ")", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            
+            if (Convert.ToInt32(intervalTextBox.Text) >= OVER_INTERVAL)
+            {
+                int tmpInterval = Convert.ToInt32(intervalTextBox.Text);
+                TimeSpan span = new TimeSpan(0, 0, 0, 0, tmpInterval);
+                string beautifySpan = $"{span.Days} days, {span.Hours} hours, {span.Seconds} seconds and {span.Milliseconds} ms.";
+                DialogResult dg = MessageBox.Show(
+                    "You are trying to set Interval (1) to\n" + beautifySpan + 
+                    "\nAre you sure to do this?", "AntiTimeOut", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+                if (dg != DialogResult.OK) return;
+            }
+
+            if (Convert.ToInt32(timeOutTextBox.Text) >= OVER_TIMEOUT)
+            {
+                int tmpTimeout = Convert.ToInt32(timeOutTextBox.Text);
+                TimeSpan span = new TimeSpan(0, 0, 0, 0, tmpTimeout);
+                string beautifySpan = $"{span.Days} days, {span.Hours} hours, {span.Seconds} seconds and {span.Milliseconds} ms.";
+                DialogResult dg = MessageBox.Show(
+                    "You are trying to set Timeout (2) to\n" + beautifySpan +
+                    "\nAre you sure to do this?", "AntiTimeOut", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+                if (dg != DialogResult.OK) return;
+            }
+
+            if (Convert.ToInt32(failureLimitTextBox.Text) >= OVER_FAILURE_LIMIT)
+            {
+                int tmpFailureLimit = Convert.ToInt32(failureLimitTextBox.Text);
+                DialogResult dg = MessageBox.Show(
+                    "You are trying to set Failure Limit (23) to " + tmpFailureLimit + " times." +
+                    "\nAre you sure to do this?", "AntiTimeOut", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+                if (dg != DialogResult.OK) return;
+            }
+
+            // Values assignment
             int interval;
             int timeOut;
             string link = urlTextBox.Text;
@@ -738,18 +839,23 @@ namespace AntiTimeOut
             {
                 interval = Convert.ToInt32(intervalTextBox.Text);
                 timeOut = Convert.ToInt32(timeOutTextBox.Text);
-                failLimit = Convert.ToUInt64(failtureLimitTextBox.Text);
+                failLimit = Convert.ToUInt64(failureLimitTextBox.Text);
                 bool convResult = Enum.TryParse<LimitAction>(failModeComboBox.GetItemText(failModeComboBox.SelectedItem), out LimitAction failMode);
                 if (!convResult) throw new AccessViolationException("Cannot parse regulated limit setting.");
 
                 var configFolderName = MainForm.DataFilePath;
                 Directory.CreateDirectory(configFolderName);
-                File.WriteAllText(configFolderName + "\\ServiceConfig.cfg", interval + " " + timeOut + " " + link + " " + failLimit + " " + (int)failMode);
-                MessageBox.Show("Parameters changed successfully.\n(Restart service to take effect)", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                File.WriteAllText(configFolderName + "\\ServiceConfig.cfg", interval + " " + timeOut + " " + link + " " + failLimit + " " + failMode.ToString());
+                if (Properties.Settings.Default.isServerUpdateSync)
+                {
+                    DialogResult dg = MessageBox.Show("Parameters changed successfully. (Restart service to take effect)\nDo you want to apply for client as well? (restart required)", "AntiTimeOut", MessageBoxButtons.OKCancel, MessageBoxIcon.Information);
+                    if (dg == DialogResult.OK) Application.Restart();
+                }
+                else MessageBox.Show("Parameters changed successfully. (Restart service to take effect)", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception exp)
             {
-                MessageBox.Show("An operation has caused an exeption:" + exp.Source + ": " + exp.Message, "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("This operation has caused an exeption:\n" + exp.Source + ": " + exp.Message, "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
         }

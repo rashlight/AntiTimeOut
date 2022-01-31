@@ -20,9 +20,6 @@
     <Setting Name="isRunOnceMode" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="ootRenewInterface" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
     <Setting Name="ootRenewSSID" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
@@ -33,7 +30,7 @@
       <Value Profile="(Default)">0</Value>
     </Setting>
     <Setting Name="commandSelectedIndex" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">1</Value>
+      <Value Profile="(Default)">0</Value>
     </Setting>
     <Setting Name="commandDelay" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">5000</Value>
@@ -49,6 +46,12 @@
     </Setting>
     <Setting Name="loadedServiceDirectory" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="ootRenewInterface" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="isServerUpdateSync" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
     </Setting>
   </Settings>
 </SettingsFile>

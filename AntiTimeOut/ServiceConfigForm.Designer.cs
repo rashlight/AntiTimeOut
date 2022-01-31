@@ -80,9 +80,9 @@
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label3.Location = new System.Drawing.Point(13, 97);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(554, 25);
+            this.label3.Size = new System.Drawing.Size(567, 25);
             this.label3.TabIndex = 3;
-            this.label3.Text = " -  Step 2: Find a service called \"Anti Time-Out Polling Service\"";
+            this.label3.Text = " -  Step 2: Find a service called \"Anti Time-Out Network Service\"";
             // 
             // label4
             // 
@@ -111,7 +111,7 @@
             this.paramsTextBox.Location = new System.Drawing.Point(512, 274);
             this.paramsTextBox.Name = "paramsTextBox";
             this.paramsTextBox.ReadOnly = true;
-            this.paramsTextBox.Size = new System.Drawing.Size(342, 27);
+            this.paramsTextBox.Size = new System.Drawing.Size(360, 27);
             this.paramsTextBox.TabIndex = 7;
             // 
             // label7
@@ -161,7 +161,7 @@
             this.doneButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
             this.doneButton.Location = new System.Drawing.Point(18, 351);
             this.doneButton.Name = "doneButton";
-            this.doneButton.Size = new System.Drawing.Size(836, 37);
+            this.doneButton.Size = new System.Drawing.Size(854, 37);
             this.doneButton.TabIndex = 11;
             this.doneButton.Text = "I\'m done!";
             this.doneButton.UseVisualStyleBackColor = true;
@@ -172,7 +172,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.ClientSize = new System.Drawing.Size(867, 400);
+            this.ClientSize = new System.Drawing.Size(884, 400);
             this.Controls.Add(this.doneButton);
             this.Controls.Add(this.label9);
             this.Controls.Add(this.label8);

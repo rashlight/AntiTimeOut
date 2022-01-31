@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Management;
 using System.Security.Principal;
 using System.ServiceProcess;
 using System.Windows.Forms;
@@ -15,22 +17,13 @@ namespace AntiTimeOut
         {
             InitializeComponent();
             mainForm = main;
-
-            try
-            {
-                statusTimer.Interval = Properties.Settings.Default.servicePollingTime;
-            }
-            catch
-            {
-                Properties.Settings.Default.servicePollingTime = 1000;
-            }
         }
 
         private void UpdateClientStatus()
         {
-            if (ServiceExists("AntiTimeOut Network Service"))
+            if (ServiceExists(MainForm.SERVICE_NAME))
             {
-                switch (GetServiceStatus("AntiTimeOut Network Service"))
+                switch (GetServiceStatus(MainForm.SERVICE_NAME))
                 {
                     case ServiceControllerStatus.Running:
                         {
@@ -94,7 +87,6 @@ namespace AntiTimeOut
         {
             return ServiceController.GetServices().Any(serviceController => serviceController.ServiceName.Equals(ServiceName));
         }
-
         public ServiceControllerStatus GetServiceStatus(string ServiceName)
         {
             ServiceController sc = new ServiceController();
@@ -102,13 +94,28 @@ namespace AntiTimeOut
 
             return sc.Status;
         }
+
         private void MainControl_Load(object sender, EventArgs e)
         {
+            try
+            {
+                if (Properties.Settings.Default.isServerUpdateSync)
+                {
+                    // Get the service interval
+                    statusTimer.Interval = Convert.ToInt32(File.ReadAllText(MainForm.DataFilePath + "\\ServiceConfig.cfg").Split(' ')[0]);
+                }
+                else statusTimer.Interval = Properties.Settings.Default.servicePollingTime;
+            }
+            catch
+            {
+                Properties.Settings.Default.servicePollingTime = 1000;
+            }
+
             UpdateClientStatus();
-            toolTip.SetToolTip(serviceButton, "Changes service options");
+            toolTip.SetToolTip(serviceButton, "Changes ATOService options");
             toolTip.SetToolTip(clientButton, "Modify client options");
             toolTip.SetToolTip(helpButton, "View documentation and indexes");
-            toolTip.SetToolTip(creditsButton, "Who created this program?");
+            toolTip.SetToolTip(creditsButton, "Who created this program?");      
         }
         private void statusTimer_Tick(object sender, EventArgs e)
         {
@@ -129,7 +136,7 @@ namespace AntiTimeOut
         }
         private void helpButton_Click(object sender, EventArgs e)
         {
-            Help.ShowHelp(this, Application.StartupPath + "\\Help\\ATOHelp.chm");
+            System.Diagnostics.Process.Start("https://github.com/rashlight/AntiTimeOut/wiki/");
         }
     }
 }
