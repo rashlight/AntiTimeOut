@@ -37,6 +37,11 @@ namespace AntiTimeOut
         /// </summary>
         private bool isInProgress = false;
 
+        private const int OVER_INTERVAL = 3600000;
+        private const int OVER_TIMEOUT = 3600000;
+        private const int OVER_FAILURE_LIMIT = 60;
+        private const int OVER_CMD_TIMEOUT = 3600000;
+
         private Task<int> RunProcessAsync(string fileName, string arguments)
         {
             var tcs = new TaskCompletionSource<int>();
@@ -173,7 +178,7 @@ namespace AntiTimeOut
                 intervalTextBox.Text = parameters[0];
                 timeOutTextBox.Text = parameters[1];
                 urlTextBox.Text = parameters[2];
-                failtureLimitTextBox.Text = parameters[3];
+                failureLimitTextBox.Text = parameters[3];
                 failModeComboBox.SelectedIndex = 0;
                 for (int i = 0; i < failModeComboBox.Items.Count; i++)
                 {
@@ -445,6 +450,7 @@ namespace AntiTimeOut
                 // Register new directory forcefully
                 Properties.Settings.Default.loadedServiceDirectory = Path.GetDirectoryName(openFileDialog.FileName);
                 Properties.Settings.Default.Save();
+                MainForm.DataFilePath = Properties.Settings.Default.loadedServiceDirectory;
                 uninstallButton.Enabled = true;
             }
             else
@@ -666,10 +672,19 @@ namespace AntiTimeOut
             {
                 timeOut = Convert.ToInt32(commandTimeOutTextBox.Text);
                 if (timeOut <= 0) throw new ArgumentOutOfRangeException("The timeout cannot be smaller or equals to 0.");
+                if (timeOut >= OVER_CMD_TIMEOUT)
+                {
+                    TimeSpan span = new TimeSpan(0, 0, 0, 0, timeOut);
+                    string beautifySpan = $"{span.Days} days, {span.Hours} hours, {span.Seconds} seconds and {span.Milliseconds} ms.";
+                    DialogResult dg = MessageBox.Show(
+                        "You are trying to set command timeout to\n" + beautifySpan +
+                        "\nAre you sure to do this?", "AntiTimeOut", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+                    if (dg != DialogResult.OK) return;
+                }
             }
             catch
             {
-                MessageBox.Show("The timeout value is out of range (1 to " + int.MaxValue + ")", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("The timeout value is out of range! (1 to " + int.MaxValue + ")", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -716,7 +731,7 @@ namespace AntiTimeOut
         }
         private void paramChangeOnceButton_Click(object sender, EventArgs e)
         {
-            if (!IsDigitsOnly(intervalTextBox.Text) || !IsDigitsOnly(timeOutTextBox.Text) || !IsDigitsOnly(failtureLimitTextBox.Text))
+            if (!IsDigitsOnly(intervalTextBox.Text) || !IsDigitsOnly(timeOutTextBox.Text) || !IsDigitsOnly(failureLimitTextBox.Text))
             {
                 MessageBox.Show("Interval (1), Timeout (2) or Failure Limit (4) is in incorrect format!", "AntiTImeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
@@ -743,7 +758,7 @@ namespace AntiTimeOut
             {
                 interval = Convert.ToInt32(intervalTextBox.Text);
                 timeOut = Convert.ToInt32(timeOutTextBox.Text);
-                failLimit = Convert.ToUInt64(failtureLimitTextBox.Text);
+                failLimit = Convert.ToUInt64(failureLimitTextBox.Text);
 
                 ServiceConfigForm scf = new ServiceConfigForm(interval, timeOut, link, failLimit, failMode);
                 scf.ShowDialog();
@@ -756,15 +771,11 @@ namespace AntiTimeOut
         }
         private void paramChangePermentButton_Click(object sender, EventArgs e)
         {
-            if (!IsDigitsOnly(intervalTextBox.Text) || !IsDigitsOnly(timeOutTextBox.Text) || !IsDigitsOnly(failtureLimitTextBox.Text))
+            // Values checking
+            if (!IsDigitsOnly(intervalTextBox.Text) || !IsDigitsOnly(timeOutTextBox.Text) || !IsDigitsOnly(failureLimitTextBox.Text))
             {
-                MessageBox.Show("Interval(1), Timeout(2) or Failure Limit(4) is in incorrect format!", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Interval(1), Timeout(2) or/and Failure Limit(4) is in incorrect format!", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
-            }
-
-            if (Convert.ToInt32(intervalTextBox.Text) <= 0 || Convert.ToInt32(timeOutTextBox.Text) < 0)
-            {
-                MessageBox.Show("Interval(1), Timeout(2) or Failure Limit(4) is not in range (1 -> " + int.MaxValue + ")", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);            
             }
 
             if (failModeComboBox.SelectedIndex < 0)
@@ -773,6 +784,52 @@ namespace AntiTimeOut
                 return;
             }
 
+            try
+            {
+                if (Convert.ToInt32(intervalTextBox.Text) <= 0 || Convert.ToInt32(timeOutTextBox.Text) <= 0 || Convert.ToInt32(failureLimitTextBox.Text) <= 0)
+                {
+                    MessageBox.Show("Interval(1), Timeout(2) or/and Failure Limit(4) is not in range! (1 -> " + int.MaxValue + ")", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+            }
+            catch
+            {
+                MessageBox.Show("Interval(1), Timeout(2) or/and Failure Limit(4) is not in range! (1 -> " + int.MaxValue + ")", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            
+            if (Convert.ToInt32(intervalTextBox.Text) >= OVER_INTERVAL)
+            {
+                int tmpInterval = Convert.ToInt32(intervalTextBox.Text);
+                TimeSpan span = new TimeSpan(0, 0, 0, 0, tmpInterval);
+                string beautifySpan = $"{span.Days} days, {span.Hours} hours, {span.Seconds} seconds and {span.Milliseconds} ms.";
+                DialogResult dg = MessageBox.Show(
+                    "You are trying to set Interval (1) to\n" + beautifySpan + 
+                    "\nAre you sure to do this?", "AntiTimeOut", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+                if (dg != DialogResult.OK) return;
+            }
+
+            if (Convert.ToInt32(timeOutTextBox.Text) >= OVER_TIMEOUT)
+            {
+                int tmpTimeout = Convert.ToInt32(timeOutTextBox.Text);
+                TimeSpan span = new TimeSpan(0, 0, 0, 0, tmpTimeout);
+                string beautifySpan = $"{span.Days} days, {span.Hours} hours, {span.Seconds} seconds and {span.Milliseconds} ms.";
+                DialogResult dg = MessageBox.Show(
+                    "You are trying to set Timeout (2) to\n" + beautifySpan +
+                    "\nAre you sure to do this?", "AntiTimeOut", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+                if (dg != DialogResult.OK) return;
+            }
+
+            if (Convert.ToInt32(failureLimitTextBox.Text) >= OVER_FAILURE_LIMIT)
+            {
+                int tmpFailureLimit = Convert.ToInt32(failureLimitTextBox.Text);
+                DialogResult dg = MessageBox.Show(
+                    "You are trying to set Failure Limit (23) to " + tmpFailureLimit + " times." +
+                    "\nAre you sure to do this?", "AntiTimeOut", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+                if (dg != DialogResult.OK) return;
+            }
+
+            // Values assignment
             int interval;
             int timeOut;
             string link = urlTextBox.Text;
@@ -782,7 +839,7 @@ namespace AntiTimeOut
             {
                 interval = Convert.ToInt32(intervalTextBox.Text);
                 timeOut = Convert.ToInt32(timeOutTextBox.Text);
-                failLimit = Convert.ToUInt64(failtureLimitTextBox.Text);
+                failLimit = Convert.ToUInt64(failureLimitTextBox.Text);
                 bool convResult = Enum.TryParse<LimitAction>(failModeComboBox.GetItemText(failModeComboBox.SelectedItem), out LimitAction failMode);
                 if (!convResult) throw new AccessViolationException("Cannot parse regulated limit setting.");
 

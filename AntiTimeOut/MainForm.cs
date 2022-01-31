@@ -114,21 +114,35 @@ namespace AntiTimeOut
                 }
                 catch
                 {
+                    
+                }
+
+                if (string.IsNullOrWhiteSpace(DataFilePath))
+                {
                     // If there are none, then give up and use drive\path_to_client\Service
                     DataFilePath = AppDomain.CurrentDomain.BaseDirectory + "\\Service";
                 }
             }
 
             // Then check if service exists
+            bool isSkipped = false;
             while (!File.Exists(DataFilePath + "\\AntiTimeOutService.exe"))
             {
-                DialogResult dg = MessageBox.Show("There are no AntiTimeOutService available at \"" + DataFilePath + "\"\n" +
-                    "This can happened due to folder migration, wrong file name or no services installed.\n" +
-                    "Press OK to select the folder location, or Cancel to exit.", "AntiTimeOut", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
-                if (dg == DialogResult.Cancel) Application.Exit();
-
-                folderBrowserDialog.ShowDialog();
-                DataFilePath = folderBrowserDialog.SelectedPath;
+                if (isSkipped) break;
+                DialogResult dg = MessageBox.Show("There are no AntiTimeOutService available at \"" + DataFilePath + "\\AntiTimeOutService.exe" + "\"\n\n" +
+                    "This can happened due to folder migration, wrong file / directory name or no services installed.\n\n" +
+                    "Press Abort to quit, Retry to select a service folder, or Ignore to force continue (not recommended).", "AntiTimeOut - Service not found", MessageBoxButtons.AbortRetryIgnore, MessageBoxIcon.Error);
+                if (dg == DialogResult.Abort) Environment.Exit(1);
+                if (dg == DialogResult.Retry)
+                {
+                    folderBrowserDialog.ShowDialog();
+                    DataFilePath = folderBrowserDialog.SelectedPath;
+                }
+                if (dg == DialogResult.Ignore) 
+                { 
+                    isSkipped = true;
+                    DataFilePath = String.Empty;
+                } 
             }
 
             return DataFilePath;
@@ -148,7 +162,15 @@ namespace AntiTimeOut
         {
             Properties.Settings.Default.loadedServiceDirectory = GetServiceDirectory();
             Properties.Settings.Default.Save();
-            fileSystemWatcher.Path = DataFilePath;
+            try
+            {
+                fileSystemWatcher.Path = DataFilePath;
+            }
+            catch (Exception)
+            {
+                fileSystemWatcher.Path = String.Empty;
+            }
+            
             mainPanel.Controls.Add(new MainControl(this));
         }
 
@@ -195,10 +217,13 @@ namespace AntiTimeOut
 
         private void notifyIcon_MouseClick(object sender, MouseEventArgs e)
         {
-            this.ShowInTaskbar = true;
-            Show();
-            this.WindowState = FormWindowState.Normal;
-            notifyIcon.Visible = false;
+            if (e.Button == MouseButtons.Left)
+            {
+                this.ShowInTaskbar = true;
+                Show();
+                this.WindowState = FormWindowState.Normal;
+                notifyIcon.Visible = false;
+            }
         }
 
         private void maximizeToolStripMenuItem_Click(object sender, EventArgs e)

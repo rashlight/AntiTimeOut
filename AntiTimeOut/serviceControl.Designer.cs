@@ -61,7 +61,7 @@
             this.failModeComboBox = new System.Windows.Forms.ComboBox();
             this.label6 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
-            this.failtureLimitTextBox = new System.Windows.Forms.TextBox();
+            this.failureLimitTextBox = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.urlTextBox = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
@@ -359,7 +359,7 @@
             this.paramPage.Controls.Add(this.failModeComboBox);
             this.paramPage.Controls.Add(this.label6);
             this.paramPage.Controls.Add(this.label5);
-            this.paramPage.Controls.Add(this.failtureLimitTextBox);
+            this.paramPage.Controls.Add(this.failureLimitTextBox);
             this.paramPage.Controls.Add(this.label4);
             this.paramPage.Controls.Add(this.urlTextBox);
             this.paramPage.Controls.Add(this.label3);
@@ -436,13 +436,13 @@
             this.label5.TabIndex = 7;
             this.label5.Text = "4: Failure Limit:";
             // 
-            // failtureLimitTextBox
+            // failureLimitTextBox
             // 
-            this.failtureLimitTextBox.Location = new System.Drawing.Point(125, 138);
-            this.failtureLimitTextBox.Name = "failtureLimitTextBox";
-            this.failtureLimitTextBox.Size = new System.Drawing.Size(216, 22);
-            this.failtureLimitTextBox.TabIndex = 6;
-            this.failtureLimitTextBox.Text = "2";
+            this.failureLimitTextBox.Location = new System.Drawing.Point(125, 138);
+            this.failureLimitTextBox.Name = "failureLimitTextBox";
+            this.failureLimitTextBox.Size = new System.Drawing.Size(216, 22);
+            this.failureLimitTextBox.TabIndex = 6;
+            this.failureLimitTextBox.Text = "2";
             // 
             // label4
             // 
@@ -545,7 +545,7 @@
         private System.Windows.Forms.OpenFileDialog openFileDialog;
         private System.Windows.Forms.TextBox intervalTextBox;
         private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.TextBox failtureLimitTextBox;
+        private System.Windows.Forms.TextBox failureLimitTextBox;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.TextBox urlTextBox;
         private System.Windows.Forms.Label label3;

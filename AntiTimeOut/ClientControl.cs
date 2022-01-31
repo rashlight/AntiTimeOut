@@ -20,6 +20,8 @@ namespace AntiTimeOut
         private OOTBeepConfigForm ootbcf;
         private OOTRenewConfigForm ootrcf;
 
+        private const int OVER_SERVICE_INTERVAL = 60000;
+
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         public static extern int SendMessage(IntPtr hWnd, uint Msg, int wParam, int lParam);
 
@@ -239,14 +241,26 @@ namespace AntiTimeOut
         {
             if (!IsDigitsOnly(saiTextBox.Text) || string.IsNullOrWhiteSpace(saiTextBox.Text))
             {
-                MessageBox.Show("Interval is in incorrect format!", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Service Availibility Interval is in incorrect format!", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
             if (Convert.ToInt32(saiTextBox.Text) <= 0)
             {
-                MessageBox.Show("\"Service Availibility Interval\" value is not in range! (1 -> " + int.MaxValue + ")", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Service Availibility Interval value is not in range! (1 -> " + int.MaxValue + ")", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
+            if (Convert.ToInt32(saiTextBox.Text) >= OVER_SERVICE_INTERVAL)
+            {
+                int tmpInterval = Convert.ToInt32(saiTextBox.Text);
+                TimeSpan span = new TimeSpan(0, 0, 0, 0, tmpInterval);
+                string beautifySpan = $"{span.Days} days, {span.Hours} hours, {span.Seconds} seconds and {span.Milliseconds} ms.";
+                DialogResult dg = MessageBox.Show(
+                    "You are trying to set Service Availibility Interval to\n" + beautifySpan +
+                    "\nAre you sure to do this?", "AntiTimeOut", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+                if (dg != DialogResult.OK) return;
+            }
+
+            Properties.Settings.Default.isServerUpdateSync = syncServerConfigCheckBox.Checked;
             Properties.Settings.Default.servicePollingTime = Convert.ToInt32(saiTextBox.Text);
             Properties.Settings.Default.Save();
             MessageBox.Show("Saved successfully.", "AntiTimeOut", MessageBoxButtons.OK, MessageBoxIcon.Information);

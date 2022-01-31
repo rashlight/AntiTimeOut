@@ -49,6 +49,8 @@ namespace AntiTimeOut
                         break;
                     }
                 }
+                MessageBox.Show("Only one instance of AntiTimeOut can be opened. This instance will now exit.",
+                    "AntiTimeOut - Different Instance", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
 
             mutex.Dispose();
