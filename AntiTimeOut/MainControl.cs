@@ -136,7 +136,7 @@ namespace AntiTimeOut
         }
         private void helpButton_Click(object sender, EventArgs e)
         {
-            Help.ShowHelp(this, Application.StartupPath + "\\Help\\ATOHelp.chm");
+            System.Diagnostics.Process.Start("https://github.com/rashlight/AntiTimeOut/wiki/");
         }
     }
 }
