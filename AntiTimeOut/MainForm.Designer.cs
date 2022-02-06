@@ -34,12 +34,12 @@
             this.fileSystemWatcher = new System.IO.FileSystemWatcher();
             this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.contextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.applicationNameMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.maximizeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
-            this.applicationNameMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher)).BeginInit();
             this.contextMenuStrip.SuspendLayout();
             this.SuspendLayout();
@@ -54,7 +54,7 @@
             // fileSystemWatcher
             // 
             this.fileSystemWatcher.EnableRaisingEvents = true;
-            this.fileSystemWatcher.Filter = "ServiceStatus.cfg";
+            this.fileSystemWatcher.Filter = "ServiceStatus.log";
             this.fileSystemWatcher.SynchronizingObject = this;
             this.fileSystemWatcher.Changed += new System.IO.FileSystemEventHandler(this.fileSystemWatcher_Changed);
             // 
@@ -77,6 +77,13 @@
             this.exitToolStripMenuItem});
             this.contextMenuStrip.Name = "contextMenuStrip";
             this.contextMenuStrip.Size = new System.Drawing.Size(215, 106);
+            // 
+            // applicationNameMenuItem
+            // 
+            this.applicationNameMenuItem.Enabled = false;
+            this.applicationNameMenuItem.Name = "applicationNameMenuItem";
+            this.applicationNameMenuItem.Size = new System.Drawing.Size(214, 24);
+            this.applicationNameMenuItem.Text = "Anti Time-Out Client";
             // 
             // maximizeToolStripMenuItem
             // 
@@ -108,13 +115,6 @@
             // folderBrowserDialog
             // 
             this.folderBrowserDialog.RootFolder = System.Environment.SpecialFolder.MyComputer;
-            // 
-            // applicationNameMenuItem
-            // 
-            this.applicationNameMenuItem.Enabled = false;
-            this.applicationNameMenuItem.Name = "applicationNameMenuItem";
-            this.applicationNameMenuItem.Size = new System.Drawing.Size(214, 24);
-            this.applicationNameMenuItem.Text = "Anti Time-Out Client";
             // 
             // MainForm
             // 

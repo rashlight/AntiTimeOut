@@ -100,7 +100,7 @@ namespace AntiTimeOut
                     string err = process.StandardOutput.ReadToEnd();
                     Show();
                     MessageBox.Show(
-                        "Can't connect to \"" + ProfileName + "\": " + err +
+                        "Can't connect to \"" + ProfileName + "\":\n" + err +
                         "\nVerify your input or adapters and try again.", "AntiTimeOut",
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
