@@ -166,9 +166,9 @@ namespace AntiTimeOut
             {
                 fileSystemWatcher.Path = DataFilePath;
             }
-            catch (Exception)
+            catch
             {
-                fileSystemWatcher.Path = String.Empty;
+                fileSystemWatcher.Path = string.Empty;
             }
             
             mainPanel.Controls.Add(new MainControl(this));
