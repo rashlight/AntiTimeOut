@@ -2,7 +2,7 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/coag3lgbh3fltnxg/branch/dev?svg=true)](https://ci.appveyor.com/project/rashlight/antitimeout/branch/dev)
 
 A network monitoring and processing client for Windows.
-The latest download is available [here](https://github.com/rashlight/SimpleClicker/releases)
+The latest download is available [here](https://github.com/rashlight/AntiTimeOut/releases/latest)
 
 ## Usage
 For guides on how and why to use this tool, check the (WIP) [wiki](https://github.com/rashlight/AntiTimeOut/wiki)
